@@ -3,7 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+<<<<<<< HEAD
   connectivity_plus
+=======
+>>>>>>> 3295455aa4e97f0a900b2301153e33dfc9d4032f
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

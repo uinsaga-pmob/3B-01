@@ -89,6 +89,7 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
+<<<<<<< HEAD
             VALUE "CompanyName", "com.example" "\0"
             VALUE "FileDescription", "umkm_digital_helper" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
@@ -96,6 +97,15 @@ BEGIN
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "umkm_digital_helper.exe" "\0"
             VALUE "ProductName", "umkm_digital_helper" "\0"
+=======
+            VALUE "CompanyName", "com.uinsaga.pm" "\0"
+            VALUE "FileDescription", "template" "\0"
+            VALUE "FileVersion", VERSION_AS_STRING "\0"
+            VALUE "InternalName", "template" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.uinsaga.pm. All rights reserved." "\0"
+            VALUE "OriginalFilename", "template.exe" "\0"
+            VALUE "ProductName", "template" "\0"
+>>>>>>> 3295455aa4e97f0a900b2301153e33dfc9d4032f
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

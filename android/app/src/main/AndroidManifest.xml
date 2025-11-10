@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
+<<<<<<< HEAD
         android:label="umkm_digital_helper"
+=======
+        android:label="template"
+>>>>>>> 3295455aa4e97f0a900b2301153e33dfc9d4032f
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

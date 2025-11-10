@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'auth/login_page.dart';
 import 'pages/main_page.dart';
 import 'splashscreen/splashscreen.dart';
@@ -9,12 +10,20 @@ void main() {
 }
 
 // MyApp adalah widget root yang menjadi dasar seluruh aplikasi
+=======
+
+void main() {
+  runApp(const MyApp());
+}
+
+>>>>>>> 3295455aa4e97f0a900b2301153e33dfc9d4032f
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+<<<<<<< HEAD
       debugShowCheckedModeBanner: false, // Menyembunyikan banner debug
       title: 'UMKM Digital Helper', // Judul aplikasi
       initialRoute: '/splash', // Route pertama yang dijalankan saat app start
@@ -27,3 +36,16 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+=======
+      title: 'Belajar Flutter Kelas ',
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("Halaman Utama", style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.deepPurpleAccent,
+        ),
+        body: Center(child: Text("Mulai Belajar Flutter")),
+      ),
+    );
+  }
+}
+>>>>>>> 3295455aa4e97f0a900b2301153e33dfc9d4032f

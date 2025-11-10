@@ -6,9 +6,14 @@
 
 #include "generated_plugin_registrant.h"
 
+<<<<<<< HEAD
 #include <connectivity_plus/connectivity_plus_windows_plugin.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
   ConnectivityPlusWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("ConnectivityPlusWindowsPlugin"));
+=======
+
+void RegisterPlugins(flutter::PluginRegistry* registry) {
+>>>>>>> 3295455aa4e97f0a900b2301153e33dfc9d4032f
 }

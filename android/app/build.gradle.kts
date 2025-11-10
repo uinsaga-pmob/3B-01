@@ -6,7 +6,11 @@ plugins {
 }
 
 android {
+<<<<<<< HEAD
     namespace = "com.example.umkm_digital_helper"
+=======
+    namespace = "com.uinsaga.pm.template"
+>>>>>>> 3295455aa4e97f0a900b2301153e33dfc9d4032f
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +25,11 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+<<<<<<< HEAD
         applicationId = "com.example.umkm_digital_helper"
+=======
+        applicationId = "com.uinsaga.pm.template"
+>>>>>>> 3295455aa4e97f0a900b2301153e33dfc9d4032f
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

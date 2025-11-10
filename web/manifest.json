@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
     "name": "umkm_digital_helper",
     "short_name": "umkm_digital_helper",
+=======
+    "name": "template",
+    "short_name": "template",
+>>>>>>> 3295455aa4e97f0a900b2301153e33dfc9d4032f
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
