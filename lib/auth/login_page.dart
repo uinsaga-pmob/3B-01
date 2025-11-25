@@ -148,7 +148,6 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-            // Tambahkan footer di sini
             _buildFooter(),
           ],
         ),

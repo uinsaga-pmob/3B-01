@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'list_produk.dart'; 
+import 'list_produk.dart'; // import data produk dari list_produk
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -60,7 +60,7 @@ class _ProductsPageState extends State<ProductsPage> {
   /// WIDGET HEADER 
   Widget _buildHeader() {
     return Container(
-      height: 80, // Tinggi header
+      height: 80, 
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.blue.shade800, Colors.blue.shade600], 
@@ -68,22 +68,18 @@ class _ProductsPageState extends State<ProductsPage> {
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)), 
         boxShadow: [BoxShadow(
           color: Colors.blue.shade800.withAlpha(76), 
-          blurRadius: 10, // Tingkat blur shadow
+          blurRadius: 10, 
           offset: const Offset(0, 4), 
         )],
       ),
       child: Stack(
         children: [
-          // Circle decoration untuk efek visual
           Positioned(right: -10, top: -10, child: _buildCircle(70)),
           Positioned(right: 25, bottom: -15, child: _buildCircle(50)),
-          
-          // Content header (icon dan text)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 25, 16, 16),
             child: Row(
               children: [
-                // Icon container dengan border
                 Container(
                   width: 44, height: 44,
                   margin: const EdgeInsets.only(right: 12),
@@ -93,9 +89,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     border: Border.all(color: Colors.white.withAlpha(128), width: 1.5),
                   ),
                   child: const Icon(LucideIcons.coffee, color: Colors.white, size: 22), 
-                ),
-                
-                // Text content
+                ),                
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +108,7 @@ class _ProductsPageState extends State<ProductsPage> {
     );
   }
 
-  /// HELPER METHOD untuk Membuat circle decoration untuk header
+  /// Helper method untuk Membuat circle decoration untuk header
   Widget _buildCircle(double size) => Container(
     width: size, height: size,
     decoration: BoxDecoration(
@@ -137,7 +131,7 @@ class _ProductsPageState extends State<ProductsPage> {
     height: 1.2, 
   );
 
-  /// WIDGET SEARCH BAR 
+  /// Widget search bar
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -145,18 +139,18 @@ class _ProductsPageState extends State<ProductsPage> {
         controller: _searchController, // Controller untuk mengakses input text
         onChanged: (_) => setState(() {}), // Rebuild UI saat text berubah
         decoration: InputDecoration(
-          hintText: "Cari Produk...", // Placeholder text
+          hintText: "Cari Produk...", 
           prefixIcon: const Icon(Icons.search), 
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(19)), 
           filled: true,
-          fillColor: Colors.transparent, // Background transparan
+          fillColor: Colors.transparent, 
           contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16), 
         ),
       ),
     );
   }
 
-  /// WIDGET CATEGORY FILTER
+  /// Widget untuk filter kategori
   Widget _buildCategoryFilter() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -170,7 +164,7 @@ class _ProductsPageState extends State<ProductsPage> {
               category,
               style: TextStyle(
                 fontSize: 12,
-                color: isSelected ? Colors.white : Colors.black87, // Warna text berbeda saat selected
+                color: isSelected ? Colors.white : Colors.black87, 
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -188,7 +182,6 @@ class _ProductsPageState extends State<ProductsPage> {
     );
   }
 
-  /// WIDGET PRODUCTS HEADER 
   Widget _buildProductsHeader() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),

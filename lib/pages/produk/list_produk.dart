@@ -219,7 +219,7 @@ class _ProductListState extends State<ProductList> {
           crossAxisCount: 2, // Jumlah kolom dalam grid
           crossAxisSpacing: 12, // Jarak horizontal antar item
           mainAxisSpacing: 12, // Jarak vertikal antar item
-          childAspectRatio: 0.8, // Rasio tinggi/lebar item (0.8 = lebih tinggi daripada lebar)
+          childAspectRatio: 0.8, // Rasio tinggi/lebar item 
         ),
         itemCount: widget.products.length, // Jumlah total item
         itemBuilder: (context, index) => _buildProductCard(widget.products[index]), // Builder untuk setiap item
@@ -244,7 +244,7 @@ class _ProductListState extends State<ProductList> {
             child: Container(
               height: 120,
               width: double.infinity,
-              color: Colors.grey.shade100, // Background default jika gambar gagal load
+              color: Colors.grey.shade100, 
               child: _buildProductImage(product), // Widget gambar produk
             ),
           ),
@@ -302,20 +302,20 @@ class _ProductListState extends State<ProductList> {
     final imageType = product['imageType'] ?? 'network'; // Default ke 'network' jika tidak ada imageType
     
     if (imageType == 'asset') {
-      // JIKA GAMBAR LOKAL: Load dari assets folder
+      // Jika gambar lokal: Load dari assets folder
       return Image.asset(
         product['image'],
         fit: BoxFit.cover, // Sesuaikan gambar ke container
         errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(Icons.coffee_outlined),
       );
     } else {
-      // JIKA GAMBAR INTERNET: 
+      // Jika gambar dari internet: 
       if (!_isConnected) {
-        // JIKA OFFLINE: Tampilkan placeholder offline
+        // Jika offline: Tampilkan placeholder offline
         return _buildOfflinePlaceholder();
       }
       
-      // JIKA ONLINE: Load gambar dari internet menggunakan CachedNetworkImage
+      // Jika online: Load gambar dari internet menggunakan CachedNetworkImage
       return CachedNetworkImage(
         imageUrl: product['image'],
         fit: BoxFit.cover,
@@ -325,7 +325,7 @@ class _ProductListState extends State<ProductList> {
     }
   }
 
-  /// Placeholder default untuk gambar (digunakan untuk error loading gambar lokal/network)
+  /// Placeholder default untuk gambar, digunakan untuk error loading gambar lokal/network
   Widget _buildImagePlaceholder(IconData icon) {
     return Container(
       color: Colors.grey.shade200,
@@ -368,7 +368,7 @@ class _ProductListState extends State<ProductList> {
     );
   }
 
-  /// Method untuk format angka menjadi format mata uang Indonesia (ribuan dipisah titik)
+  /// Method untuk format angka menjadi format mata uang Indonesia, ribuan dipisah titik
   String _formatCurrency(int amount) {
     return amount.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), // Regex untuk mencari setiap 3 digit
