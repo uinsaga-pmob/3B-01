@@ -98,7 +98,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pushReplacementNamed(context, '/main');
-                      },                      style: ElevatedButton.styleFrom(
+                      },
+                        style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF004AAD),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -142,8 +143,6 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
-
-  
 
   // Fungsi bantu dekorasi input
   InputDecoration _inputDecoration(String hint) {

@@ -21,67 +21,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildSocialButton(IconData icon, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 24,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFooter() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Text(
-            "Atau login dengan",
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildSocialButton(Icons.facebook, Colors.blue[800]!, () {
-                _showSnackBar('Facebook login coming soon!');
-              }),
-              const SizedBox(width: 16),
-              _buildSocialButton(Icons.g_mobiledata, Colors.red, () {
-                _showSnackBar('Google login coming soon!');
-              }),
-              const SizedBox(width: 16),
-              _buildSocialButton(Icons.apple, Colors.black, () {
-                _showSnackBar('Apple login coming soon!');
-              }),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            "Butuh bantuan? Hubungi support@myapp.com",
-            style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -209,8 +148,70 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
+            // Tambahkan footer di sini
             _buildFooter(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Text(
+            "Atau login dengan",
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildSocialButton(Icons.facebook, Colors.blue[800]!, () {
+                _showSnackBar('Facebook login coming soon!');
+              }),
+              const SizedBox(width: 16),
+              _buildSocialButton(Icons.g_mobiledata, Colors.red, () {
+                _showSnackBar('Google login coming soon!');
+              }),
+              const SizedBox(width: 16),
+              _buildSocialButton(Icons.apple, Colors.black, () {
+                _showSnackBar('Apple login coming soon!');
+              }),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            "Butuh bantuan? Hubungi support@myapp.com",
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSocialButton(IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 24,
         ),
       ),
     );

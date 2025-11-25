@@ -1,0 +1,42 @@
+# file sistem
+.DS_Store
+Thumbs.db
+
+# file editor
+.idea/
+.vscode/
+*.iml
+
+# cache flutter dan dart
+.dart_tool/
+.packages
+.pub/
+.pub-cache/
+.metadata
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# hasil build
+build/
+
+# android
+android/**/build/
+android/**/.gradle/
+android/local.properties
+
+# iOS
+ios/Flutter/.last_build_id
+ios/Pods/
+ios/.symlinks/
+
+# desktop
+linux/flutter/ephemeral/
+macos/Flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# file sementara
+*.log
+*.tmp
+*.temp
+.migrate_working_dir/
+.cache/

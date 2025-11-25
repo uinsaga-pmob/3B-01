@@ -11,10 +11,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeApp();
+  }
     // Navigasi ke halaman utama setelah 5 detik
-    Future.delayed(const Duration(seconds: 5), () {
-      Navigator.pushReplacementNamed(context, '/login');
-    });
+    Future<void> _initializeApp() async {
+    // Simulasikan loading data atau inisialisasi
+    await Future.delayed(const Duration(seconds: 5));
+    
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/main');
   }
 
   @override
@@ -23,17 +28,16 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white, 
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Posisi tengah vertikal
+          mainAxisAlignment: MainAxisAlignment.center, 
           children: [
-            // Menampilkan logo aplikasi
             Image.asset(
               'assets/logo_umkm.png',
               width: 150,
               height: 150,
-              fit: BoxFit.contain, // Memastikan gambar proporsional
+              fit: BoxFit.contain, 
             ),
-            const SizedBox(height: 20), // Spasi antara logo dan loading
-            _buildLoadingPlaceholder(), // Widget loading indicator custom
+            const SizedBox(height: 20), 
+            _buildLoadingPlaceholder(), 
           ],
         ),
       ),
@@ -43,16 +47,15 @@ class _SplashScreenState extends State<SplashScreen> {
   // Method untuk membangun loading indicator
   Widget _buildLoadingPlaceholder() {
     return Container(
-      color: Colors.transparent, // Background transparan mengikuti scaffold
+      color: Colors.transparent, 
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Circular progress indicator dengan ukuran kecil
           SizedBox(
             width: 20,
             height: 20,
             child: CircularProgressIndicator(
-              strokeWidth: 4, // Ketebalan garis
+              strokeWidth: 3, 
               valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade700), 
             ),
           ),
