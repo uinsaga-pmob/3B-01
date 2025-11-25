@@ -40,6 +40,7 @@ UMKM Digital Helper adalah solusi all-in-one untuk pemilik coffee shop dalam men
 - cupertino_icons - iOS-style icons
 
 ## Struktur Project
+```
 UMKM_Digital_Helper/
 ├── lib/
 │   ├── main.dart                     # Entry point aplikasi
