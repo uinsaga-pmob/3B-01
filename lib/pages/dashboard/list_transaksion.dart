@@ -18,6 +18,20 @@ final List<Map<String, dynamic>> todayTransactions = [
     'title': 'Beli Stok Bensin',
     'date': '13 Oktober 2025, 07.00',
     'amount': 650000,
+    'isIncome': true,
+  },
+
+  {
+    'title': 'Penjualan kopi susu',
+    'date': '13 Oktober 2025, 07.00',
+    'amount': 15000,
+    'isIncome': true,
+  },
+
+  {
+    'title': 'Beli bahan matcha latte',
+    'date': '13 Oktober 2025, 07.00',
+    'amount': 12000,
     'isIncome': false,
   },
 ];
@@ -46,6 +60,19 @@ final List<Map<String, dynamic>> allTransactions = [
     'date': '10 Oktober 2025, 09.15',
     'amount': 84000,
     'isIncome': true,
+  },
+
+  {
+    'title': 'Beli Token Listrik',
+    'date': '7 Oktober 2025, 08.30',
+    'amount': 340000,
+    'isIncome': false,
+  },
+  {
+    'title': 'Bayar Gaji Karyawan',
+    'date': '3 Oktober 2025, 08.30',
+    'amount': 480000,
+    'isIncome': false,
   },
 ];
 
@@ -78,9 +105,16 @@ class TransactionList extends StatelessWidget {
           );
   }
 
-  Widget _buildTransactionCard(String title, String date, int amount, bool isIncome) {
+  Widget _buildTransactionCard(
+    String title,
+    String date,
+    int amount,
+    bool isIncome,
+  ) {
     final color = isIncome ? Colors.green : Colors.red;
-    final icon = isIncome ? LucideIcons.arrowUpRight : LucideIcons.arrowDownLeft;
+    final icon = isIncome
+        ? LucideIcons.arrowUpRight
+        : LucideIcons.arrowDownLeft;
     final category = isIncome ? 'Pemasukan' : 'Pengeluaran';
 
     return Container(
@@ -106,11 +140,7 @@ class TransactionList extends StatelessWidget {
               color: color.withAlpha(25),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 18,
-            ),
+            child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -137,7 +167,10 @@ class TransactionList extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(4),
@@ -188,11 +221,7 @@ class TransactionList extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            LucideIcons.fileText,
-            size: 64,
-            color: Colors.grey.shade300,
-          ),
+          Icon(LucideIcons.fileText, size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           Text(
             'Tidak ada transaksi',
@@ -205,10 +234,7 @@ class TransactionList extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             showToday ? 'Tidak ada transaksi hari ini' : 'Belum ada transaksi',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade400,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
           ),
         ],
       ),
@@ -216,9 +242,6 @@ class TransactionList extends StatelessWidget {
   }
 
   String _formatCurrency(int amount) {
-    return 'Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
-    )}';
+    return 'Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}';
   }
 }
