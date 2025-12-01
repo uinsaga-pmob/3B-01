@@ -13,13 +13,12 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     _initializeApp();
   }
-    // Navigasi ke halaman utama setelah 5 detik
     Future<void> _initializeApp() async {
-    // Simulasikan loading data atau inisialisasi
+
     await Future.delayed(const Duration(seconds: 5));
     
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, '/main');
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
