@@ -37,6 +37,7 @@ dependencies:
   # Package untuk mendeteksi status koneksi internet
   # Digunakan untuk smart image loading (online/offline mode) di produk page
   connectivity_plus: ^5.0.1 
+  fl_chart: ^0.65.0
 
 # PACKAGE HANYA UNTUK DEVELOPMENT
 dev_dependencies:
@@ -48,6 +49,8 @@ dev_dependencies:
   # Package untuk generate app icons otomatis dari source image
   # Memudahkan proses pembuatan berbagai ukuran icon untuk Android/iOS
   flutter_launcher_icons: ^0.13.1
+
+  
 
 # KONFIGURASI FLUTTER SPECIFIC
 flutter:
@@ -66,6 +69,10 @@ flutter:
     - assets/produk/es_teh.jpg
     - assets/produk/sate.jpg
     - assets/produk/bakso.jpeg
+    - assets/produk/cetos.jpg
+    - assets/produk/lays.jpg
+    - assets/produk/nugget.jpg
+    - assets/produk/kukis.jpg
 
 # KONFIGURASI AUTO-GENERATE APP ICONS
 flutter_launcher_icons:
@@ -83,3 +90,7 @@ flutter_launcher_icons:
   # Background color untuk adaptive icons (format hex color)
   # Warna putih (#FFFFFF) memberikan contrast yang baik dengan foreground
   adaptive_icon_background: "#FFFFFF"
+  
+  
+  
+  

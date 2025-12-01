@@ -138,6 +138,47 @@ final List<Map<String, dynamic>> productList = [
     'image': 'assets/produk/sate.jpg',
     'imageType': 'asset', 
   },
+
+  {
+    'id': '15',
+    'name': 'lays',
+    'category': 'Snack',
+    'price': 10000,
+    'stock': 30,
+    'image': 'assets/produk/lays.jpg',
+    'imageType': 'asset',
+  },
+
+  {
+    'id': '16',
+    'name': 'cetos',
+    'category': 'Snack',
+    'price': 10000,
+    'stock': 25,
+    'image': 'assets/produk/cetos.jpg',
+    'imageType': 'asset',
+  },
+
+  {
+    'id': '17',
+    'name': 'kukis',
+    'category': 'Snack',
+    'price': 15000,
+    'stock': 30,
+    'image': 'assets/produk/kukis.jpg',
+    'imageType': 'asset',
+  },
+
+  
+  {
+    'id': '17',
+    'name': 'nugget',
+    'category': 'Snack',
+    'price': 20000,
+    'stock': 100,
+    'image': 'assets/produk/nugget.jpg',
+    'imageType': 'asset',
+  },
 ];
 
 
