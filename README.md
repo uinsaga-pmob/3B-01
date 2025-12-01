@@ -4,30 +4,6 @@ Aplikasi Flutter untuk manajemen bisnis UMKM coffee shop yang membantu mengelola
 ## Tentang Aplikasi
 UMKM Digital Helper adalah solusi all-in-one untuk pemilik coffee shop dalam mengelola operasional bisnis sehari-hari. Aplikasi ini menyediakan dashboard lengkap untuk monitoring penjualan, manajemen produk, dan analisis statistik bisnis.
 
-### Dashboard
-- Ringkasan Keuangan: Total pendapatan, pengeluaran, dan profit
-- Statistik Real-time: Update harian/mingguan/bulanan
-- Transaksi Terkini: Riwayat transaksi hari ini dan semua waktu
-- Quick Overview: Card-based dashboard untuk insight cepat
-
-### Manajemen Produk
-- Katalog Produk: Daftar lengkap menu coffee shop
-- Kategori Produk: Kopi, Non-Kopi, Snack, Minuman
-- Filter & Pencarian: Cari produk berdasarkan nama dan kategori
-- Info Stok & Harga: Kelola inventory dan pricing
-- Dual Image Support: Gambar lokal dan dari internet
-
-### Pengaturan & Profil
-- Manajemen Profil: Data pemilik dan informasi bisnis
-- Pengaturan Aplikasi: Tampilan, notifikasi, keamanan
-- Info Bisnis: Alamat, jam operasional, tipe bisnis
-- Backup & Storage: Kelola data dan cache aplikasi
-
-### Smart Features
-- Offline Support: Tetap bisa akses data tanpa internet
-- Cached Images: Optimasi loading gambar dengan caching
-- Connectivity Detection: Auto-switch antara online/offline mode
-
 ### Framework & Language
 - Flutter 3.9.2 - UI Toolkit cross-platform
 - Dart 3.9.2 - Bahasa pemrograman
