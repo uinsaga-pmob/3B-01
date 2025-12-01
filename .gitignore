@@ -34,7 +34,6 @@ linux/flutter/ephemeral/
 macos/Flutter/ephemeral/
 windows/flutter/ephemeral/
 
-# file sementara
 *.log
 *.tmp
 *.temp
