@@ -57,7 +57,7 @@ class _ProductsPageState extends State<ProductsPage> {
     );
   }
 
-  /// WIDGET HEADER 
+  // Widget untuk membuat header
   Widget _buildHeader() {
     return Container(
       height: 80, 
@@ -108,7 +108,7 @@ class _ProductsPageState extends State<ProductsPage> {
     );
   }
 
-  /// Helper method untuk Membuat circle decoration untuk header
+  // Method untuk Membuat circle decoration untuk header
   Widget _buildCircle(double size) => Container(
     width: size, height: size,
     decoration: BoxDecoration(
@@ -121,7 +121,7 @@ class _ProductsPageState extends State<ProductsPage> {
     color: Colors.white,
     fontSize: 18,
     fontWeight: FontWeight.bold,
-    height: 1.1, // Line height
+    height: 1.1,
   );
 
   final _subtitleStyle = TextStyle(
@@ -150,7 +150,7 @@ class _ProductsPageState extends State<ProductsPage> {
     );
   }
 
-  /// Widget untuk filter kategori
+  // Widget untuk filter kategori
   Widget _buildCategoryFilter() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -182,6 +182,7 @@ class _ProductsPageState extends State<ProductsPage> {
     );
   }
 
+  // Widget untuk header produk
   Widget _buildProductsHeader() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
