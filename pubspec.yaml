@@ -6,12 +6,10 @@ description: "Aplikasi UMKM Digital Helper untuk mengelola bisnis coffee shop"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
-
-# Environment development - menentukan versi Dart SDK minimum yang diperlukan
 environment:
-  sdk: ^3.9.2  # Membutuhkan Dart SDK versi 3.9.2 atau lebih tinggi
+  sdk: ^3.9.2 
 
-# PACKAGE YANG DIPERLUKAN SAAT APLIKASI BERJALAN
+# Package yang diperlukan untuk build aplikasi
 dependencies:
   # Flutter SDK core - framework utama untuk development
   flutter:
@@ -35,11 +33,14 @@ dependencies:
   cached_network_image: ^3.3.0 
   
   # Package untuk mendeteksi status koneksi internet
-  # Digunakan untuk smart image loading (online/offline mode) di produk page
+  # Digunakan untuk smart image loading (online/offline mode) di halaman produk
   connectivity_plus: ^5.0.1 
+
+  # Package untuk visualisasi data menggunakan chart
+  # Digunakan di halaman statistik untuk menampilkan data penjualan
   fl_chart: ^0.65.0
 
-# PACKAGE HANYA UNTUK DEVELOPMENT
+# Package yang diperlukan untuk development
 dev_dependencies:
   # Framework testing untuk Flutter - digunakan untuk unit test dan widget test
   flutter_test:
@@ -52,7 +53,7 @@ dev_dependencies:
 
   
 
-# KONFIGURASI FLUTTER SPECIFIC
+# Konfigurasi Flutter specific
 flutter:
   # Mengaktifkan Material Design components
   # Memberikan akses ke widget-widget Material Design seperti AppBar, Card, dll
@@ -63,34 +64,27 @@ flutter:
   assets:
     - assets/logo_umkm.png              # Logo utama untuk UI aplikasi (splash screen, header)
     - assets/logo_apk.png               # Logo khusus untuk app icon/launcher icon
-    - assets/produk/matcha_latte.jpg    # Gambar produk Matcha Latte
-    - assets/produk/kopi_susu_gula_aren.jpg  # Gambar produk Kopi Susu Gula Aren
-    - assets/produk/kopi_americano.jpg  # Gambar produk Kopi Americano
+    - assets/produk/matcha_latte.jpg   
+    - assets/produk/kopi_susu_gula_aren.jpg 
+    - assets/produk/kopi_americano.jpg 
     - assets/produk/es_teh.jpg
     - assets/produk/sate.jpg
     - assets/produk/bakso.jpeg
-    - assets/produk/cetos.jpg
-    - assets/produk/lays.jpg
     - assets/produk/nugget.jpg
     - assets/produk/kukis.jpg
 
-# KONFIGURASI AUTO-GENERATE APP ICONS
+# Konfigurasi auto-generate app icons
 flutter_launcher_icons:
   # Generate icons untuk platform Android
   android: true
-  
   # Path ke source image yang akan digunakan sebagai dasar app icon
   # File ini akan di-resize otomatis ke berbagai ukuran yang diperlukan
   image_path: "assets/logo_apk.png"
-  
   # Foreground image untuk adaptive icons (Android 8.0+)
   # Menentukan shape icon yang akan ditampilkan di launcher
   adaptive_icon_foreground: "assets/logo_apk.png"
-  
-  # Background color untuk adaptive icons (format hex color)
-  # Warna putih (#FFFFFF) memberikan contrast yang baik dengan foreground
+  # Background color untuk adaptive icons 
   adaptive_icon_background: "#FFFFFF"
-  
-  
-  
-  
+
+# Jalankan perintah flutter pub run flutter_launcher_icons:main 
+# untuk generate app icons otomatis

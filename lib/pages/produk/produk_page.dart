@@ -12,7 +12,7 @@ class ProductsPage extends StatefulWidget {
 class _ProductsPageState extends State<ProductsPage> {
   String _selectedCategory = 'Semua'; 
   final TextEditingController _searchController = TextEditingController(); 
-  final List<String> _categories = ['Semua', 'Kopi', 'Non-Kopi', 'Snack'];
+  final List<String> _categories = ['Semua', 'Kopi', 'Minuman', 'Makanan'];
 
   List<Map<String, dynamic>> get _filteredProducts {
     var filtered = productList; 

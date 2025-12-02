@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'statistik_data.dart';
+import 'statistik_data.dart'; // Import data dari statistik_data
 
 // Halaman statistik menampilkan dashboard analitik dengan visualisasi data
-// menggunakan Flutter dan package fl_chart untuk chart rendering
-
-class StatisticsPage extends StatefulWidget {
-  const StatisticsPage({super.key});
+// menggunakan package fl_chart untuk chart rendering
+class StatistikPage extends StatefulWidget {
+  const StatistikPage({super.key});
 
   @override
-  State<StatisticsPage> createState() => _StatisticsPageState();
+  State<StatistikPage> createState() => _StatistikPageState();
 }
 
-class _StatisticsPageState extends State<StatisticsPage> {
+class _StatistikPageState extends State<StatistikPage> {
   // State untuk menyimpan filter periode dan tipe chart yang aktif
   // Nilai default: 'Minggu Ini' dan 'Pendapatan'
   String _selectedPeriod = 'Minggu Ini';
@@ -40,8 +39,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     _buildChartSection(), // Chart batang interaktif
                     const SizedBox(height: 20),
                     _buildTopProductsSection(), // List produk terlaris
-                    const SizedBox(height: 20),
-                    _buildProductByCategorySection(), // List produk per kategori
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -251,7 +248,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               ),
               LucideIcons.trendingUp,
               Colors.green,
-              12.5, // Growth percentage (dummy data)
+              12.5, 
             ),
           ),
           const SizedBox(width: 12),
@@ -263,7 +260,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               ),
               LucideIcons.trendingDown,
               Colors.red,
-              -5.2, // Growth percentage (dummy data)
+              -5.2, 
             ),
           ),
           const SizedBox(width: 12),
@@ -275,7 +272,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               ),
               LucideIcons.dollarSign,
               Colors.blue,
-              8.3, // Growth percentage (dummy data)
+              8.3, 
             ),
           ),
         ],
@@ -640,198 +637,54 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   '${product.sales} penjualan • ${StatisticsRepository.formatCurrency(product.revenue)}',
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
-              ],
-            ),
-          ),
-          // Growth indicator
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: product.growth >= 0
-                  ? Colors.green.withAlpha(25)
-                  : Colors.red.withAlpha(25),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  product.growth >= 0
-                      ? LucideIcons.trendingUp
-                      : LucideIcons.trendingDown,
-                  size: 12,
-                  color: product.growth >= 0 ? Colors.green : Colors.red,
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  '${product.growth.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: product.growth >= 0 ? Colors.green : Colors.red,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Menampilkan produk yang dikelompokkan per kategori
-  Widget _buildProductByCategorySection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade100,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Produk per Kategori',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 16),
-          // List kategori dengan produknya
-          ...StatisticsRepository.categoryProducts.map((category) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header kategori dengan warna indicator
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: category.color,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
+                const SizedBox(height: 4),
+                // Tambahan informasi: Harga per unit dan margin
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withAlpha(15),
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        category.category,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${category.products.length} produk',
+                      child: Text(
+                        'Harga: ${StatisticsRepository.formatCurrency(product.unitPrice)}',
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
+                          fontSize: 10,
+                          color: Colors.blue.shade700,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: product.growth >= 0
+                            ? Colors.green.withAlpha(15)
+                            : Colors.red.withAlpha(15),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${product.growth >= 0 ? '+' : ''}${product.growth.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: product.growth >= 0
+                              ? Colors.green.shade700
+                              : Colors.red.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                // List produk dalam kategori ini
-                ...category.products.map((product) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.grey.shade200,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        // Icon produk berdasarkan kategori
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: category.color.withAlpha(25),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            _getProductIcon(category.category),
-                            color: category.color,
-                            size: 16,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Informasi produk
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                product.name,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${product.sales} penjualan • ${StatisticsRepository.formatCurrency(product.revenue)}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Harga per unit
-                        Text(
-                          StatisticsRepository.formatCurrency(product.unitPrice),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: category.color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-                const SizedBox(height: 16),
               ],
-            );
-          }),
+            ),
+          ),
         ],
       ),
     );
-  }
-
-  // Helper Method untuk mendapatkan icon produk
-  // Mengembalikan icon yang sesuai berdasarkan kategori produk
-  // Digunakan untuk visualisasi di list produk per kategori
-  IconData _getProductIcon(String category) {
-    switch (category) {
-      case 'Kopi':
-        return LucideIcons.coffee;
-      case 'Snack':
-        return LucideIcons.cookie;
-      case 'Non-Kopi':
-        return LucideIcons.glassWater;
-      case 'Lainnya':
-        return LucideIcons.package;
-      default:
-        return LucideIcons.package;
-    }
   }
 }

@@ -299,11 +299,12 @@ class AkunPage extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 12),
+        // Button Keluar dengan Confirmation Dialog
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () {
-              _navigateToLoginPage(context);
+              _showLogoutConfirmationDialog(context);
             },
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -312,12 +313,24 @@ class AkunPage extends StatelessWidget {
               ),
               side: BorderSide(color: Colors.red.shade300),
             ),
-            child: Text(
-              'Keluar',
-              style: TextStyle(
-                color: Colors.red.shade600,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  LucideIcons.logOut,
+                  size: 18,
+                  color: Colors.red.shade600,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Keluar',
+                  style: TextStyle(
+                    color: Colors.red.shade600,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -325,10 +338,138 @@ class AkunPage extends StatelessWidget {
     );
   }
 
+  // Method untuk menampilkan confirmation dialog logout dengan background putih
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 0,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon Logout
+                Container(
+                  width: 60,
+                  height: 60,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Icon(
+                    LucideIcons.logOut,
+                    color: Colors.red.shade600,
+                    size: 28,
+                  ),
+                ),
+                
+                // Title
+                const Text(
+                  'Konfirmasi Logout',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Message
+                const Text(
+                  'Apakah Anda yakin ingin keluar dari akun ini?',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Action Buttons
+                Row(
+                  children: [
+                    // Button Batal
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          side: const BorderSide(color: Colors.grey),
+                        ),
+                        child: const Text(
+                          'Batal',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 12),
+                    
+                    // Button Ya, Keluar
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _navigateToLoginPage(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.shade600,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          'Ya, Keluar',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Method untuk navigasi ke login page dengan clear navigation stack
   void _navigateToLoginPage(BuildContext context) {
-    Navigator.push(
+    // Menggunakan pushAndRemoveUntil untuk clear semua halaman sebelumnya
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
+      (Route<dynamic> route) => false, // Hapus semua route
     );
   }
 }

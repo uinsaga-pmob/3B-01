@@ -18,7 +18,7 @@ class _MainPageState extends State<MainPage> {
   // List widget untuk setiap halaman dalam bottom navigation
   final List<Widget> _pages = const [
     DashboardPage(),      
-    StatisticsPage(),     
+    StatistikPage(),     
     ProductsPage(),       
     SettingsPage()        
   ];
