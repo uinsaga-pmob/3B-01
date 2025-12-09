@@ -246,6 +246,18 @@ final List<Map<String, dynamic>> productList = [
     'stock': 15,
     'image': 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop',
   },
+
+  {
+    'id': '30',
+    'name': 'v60 Coffee',
+    'category': 'Kopi',
+    'price': 20000,
+    'stock': 100,
+    'image': 'assets/produk/v60.jpg',
+    'imageType': 'asset',
+  },
+
+  
 ];
 
 

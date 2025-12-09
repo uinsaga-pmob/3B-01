@@ -72,6 +72,7 @@ flutter:
     - assets/produk/bakso.jpeg
     - assets/produk/nugget.jpg
     - assets/produk/kukis.jpg
+    - assets/produk/v60.jpg
 
 # Konfigurasi auto-generate app icons
 flutter_launcher_icons:
