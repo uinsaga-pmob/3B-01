@@ -135,49 +135,116 @@ class _ProductsPageState extends State<ProductsPage> {
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: TextField(
-        controller: _searchController, // Controller untuk mengakses input text
-        onChanged: (_) => setState(() {}), // Rebuild UI saat text berubah
-        decoration: InputDecoration(
-          hintText: "Cari Produk...", 
-          prefixIcon: const Icon(Icons.search), 
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(19)), 
-          filled: true,
-          fillColor: Colors.transparent, 
-          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16), 
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(19),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(13), 
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            hintText: "Cari Produk...", 
+            prefixIcon: const Icon(Icons.search, color: Colors.blueGrey), 
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(19),
+              borderSide: BorderSide.none,
+            ), 
+            filled: true,
+            fillColor: Colors.white, 
+            contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+            hintStyle: TextStyle(color: Colors.grey.shade500),
+          ),
         ),
       ),
     );
   }
 
-  // Widget untuk filter kategori
+  // Widget untuk filter kategori 
   Widget _buildCategoryFilter() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Wrap(
-        spacing: 8, // Jarak horizontal antar chips
-        runSpacing: 8, // Jarak vertikal antar baris chips
-        children: _categories.map((category) {
-          final isSelected = _selectedCategory == category; // Cek apakah kategori ini sedang dipilih
-          return ChoiceChip(
-            label: Text(
-              category,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? Colors.white : Colors.black87, 
-                fontWeight: FontWeight.w500,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: _categories.map((category) {
+            final isSelected = _selectedCategory == category;
+            final bool isFirst = category == _categories.first;
+            final bool isLast = category == _categories.last;
+            
+            return Container(
+              margin: EdgeInsets.only(
+                right: isLast ? 0 : 8,
+                left: isFirst ? 0 : 0,
               ),
-            ),
-            selected: isSelected, // Status selected chip
-            onSelected: (_) => setState(() => _selectedCategory = category), // Update kategori saat dipilih
-            selectedColor: Colors.blue.shade700,
-            backgroundColor: Colors.white,
-            side: BorderSide(color: Colors.grey.shade300, width: 1), 
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), 
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), 
-            labelPadding: const EdgeInsets.symmetric(horizontal: 4), 
-          );
-        }).toList(), 
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedCategory = category),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    gradient: isSelected 
+                        ? LinearGradient(
+                            colors: [Colors.blue.shade700, Colors.blue.shade600],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
+                    color: isSelected ? null : Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      if (isSelected)
+                        BoxShadow(
+                          color: Colors.blue.shade300.withAlpha(102), 
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        )
+                      else
+                        BoxShadow(
+                          color: Colors.grey.shade300.withAlpha(204), 
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                    ],
+                    border: isSelected
+                        ? null
+                        : Border.all(color: Colors.grey.shade200, width: 1.5),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSelected)
+                        Container(
+                          margin: const EdgeInsets.only(right: 6),
+                          child: Icon(
+                            Icons.check_circle_rounded,
+                            size: 16,
+                            color: Colors.white.withAlpha(229), 
+                          ),
+                        ),
+                      Text(
+                        category,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isSelected ? Colors.white : Colors.blueGrey.shade800,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -195,6 +262,33 @@ class _ProductsPageState extends State<ProductsPage> {
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.shade100, width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.filter_alt_rounded,
+                  size: 16,
+                  color: Colors.blue.shade700,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _selectedCategory,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue.shade800,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
