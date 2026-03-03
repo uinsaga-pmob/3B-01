@@ -34,6 +34,12 @@ final List<Map<String, dynamic>> todayTransactions = [
     'amount': 12000,
     'isIncome': false,
   },
+  {
+    'title': 'Bayar gatau',
+    'date': '10 Maret 2025, 08.30',
+    'amount': 500000,
+    'isIncome': false,
+  },
 ];
 
 final List<Map<String, dynamic>> allTransactions = [
@@ -72,6 +78,13 @@ final List<Map<String, dynamic>> allTransactions = [
     'title': 'Bayar Gaji Karyawan',
     'date': '3 Oktober 2025, 08.30',
     'amount': 480000,
+    'isIncome': false,
+  },
+
+  {
+    'title': 'Bayar gatau',
+    'date': '10 Maret 2025, 08.30',
+    'amount': 500000,
     'isIncome': false,
   },
 ];
