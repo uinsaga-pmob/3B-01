@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Navigasi ke halaman login dengan mengganti route saat ini
     // sehingga pengguna tidak bisa kembali ke splash screen dengan tombol back
-    Navigator.pushReplacementNamed(context, '/login');
+    Navigator.pushReplacementNamed(context, '/main');
   }
 
   @override
