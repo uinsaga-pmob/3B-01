@@ -39,3 +39,6 @@ windows/flutter/ephemeral/
 *.temp
 .migrate_working_dir/
 .cache/
+
+# FVM Version Cache
+.fvm/
