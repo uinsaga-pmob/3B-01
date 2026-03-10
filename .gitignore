@@ -41,4 +41,4 @@ windows/flutter/ephemeral/
 .cache/
 
 # FVM Version Cache
-.fvm/
+.fvm/flutter_sdk
