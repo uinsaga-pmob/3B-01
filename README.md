@@ -19,40 +19,75 @@ UMKM Digital Helper adalah solusi all-in-one untuk pemilik coffee shop dalam men
 ```
 UMKM_Digital_Helper/
 ├── lib/
-│   ├── main.dart                     # Entry point aplikasi
-│   │
-│   ├── splashscreen/                 # Folder splashscreen
-│   │   └── splashscreen.dart         # Halaman splash screen
-│   │
-│   ├── auth/                         # Folder autentikasi
-│   │   ├── login_page.dart           # Halaman login
-│   │   └── register_page.dart        # Halaman register
-│   │
-│   ├── pages/                        # Folder utama berisi semua halaman
-│   │   ├── main_page.dart            # Wrapper navigasi utama (BottomNav / Drawer)
-│   │   │
-│   │   ├── dashboard/                # Modul dashboard
-│   │   │   ├── dashboard_page.dart   # Halaman utama dashboard
-│   │   │   └── list_transaksion.dart # Daftar transaksi (list)
-│   │   │
-│   │   ├── produk/                   # Modul manajemen produk
-│   │   │   ├── produk_page.dart      # Halaman produk utama
-│   │   │   └── list_produk.dart      # Daftar produk
-│   │   │
-│   │   ├── settings/                 # Modul pengaturan
-│   │   │   ├── settings_page.dart    # Halaman pengaturan aplikasi
-│   │   │   └── akun_page.dart        # Halaman profil pengguna / akun
-│   │   │
-│   │   └── statistik/                # Modul statistik dan laporan
-│   │       └──  statistik_page.dart   # Halaman utama statistik
-│   
-│ 
-├── assets/
-│   ├── logo_umkm.png                 # Logo UMKM (untuk header)
-│   ├── logo_apk.png                  # Logo utama aplikasi
-│   └── produk/                       # Gambar-gambar produk
-│       ├── kopi_susu_gula_aren.jpg
-│       ├── kopi_americano.jpg
-│       └── matcha_latte.jpg
+│   ├── main.dart
 │
-└── pubspec.yaml                      # Dependencies dan konfigurasi Flutter
+│   ├── core/                         # Konfigurasi global
+│   │   ├── constants/
+│   │   ├── theme/
+│   │   └── utils/
+│
+│   ├── models/                       # Data model (entitas)
+│   │   ├── user_model.dart
+│   │   ├── produk_model.dart
+│   │   └── transaksi_model.dart
+│
+│   ├── database/                     # SQLite setup & helper
+│   │   └── database_helper.dart
+│
+│   ├── repositories/                 # Data access layer (CRUD)
+│   │   ├── user_repository.dart
+│   │   ├── produk_repository.dart
+│   │   └── transaksi_repository.dart
+│
+│   ├── providers/                    # State management
+│   │   ├── user_provider.dart
+│   │   ├── produk_provider.dart
+│   │   └── transaksi_provider.dart
+│
+│   ├── screens/                      # Semua UI (halaman)
+│   │   ├── splash/
+│   │   │   └── splash_screen.dart
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── login_screen.dart
+│   │   │   └── register_screen.dart
+│   │   │
+│   │   ├── main/
+│   │   │   └── main_screen.dart
+│   │   │
+│   │   ├── dashboard/
+│   │   │   ├── dashboard_screen.dart
+│   │   │   └── list_transaksi_screen.dart
+│   │   │
+│   │   ├── produk/
+│   │   │   ├── produk_screen.dart
+│   │   │   ├── tambah_produk_screen.dart
+│   │   │   └── edit_produk_screen.dart
+│   │   │
+│   │   ├── transaksi/
+│   │   │   ├── tambah_transaksi_screen.dart
+│   │   │   └── detail_transaksi_screen.dart
+│   │   │
+│   │   ├── statistik/
+│   │   │   └── statistik_screen.dart
+│   │   │
+│   │   └── settings/
+│   │       ├── settings_screen.dart
+│   │       └── akun_screen.dart      # Ambil data dari user_provider
+│
+│   ├── widgets/                      # Komponen reusable UI
+│   │   ├── custom_button.dart
+│   │   ├── custom_textfield.dart
+│   │   └── card_produk.dart
+│
+├── assets/
+│   ├── images/
+│   │   ├── logo_umkm.png
+│   │   ├── logo_apk.png
+│   │   └── produk/
+│   │       ├── kopi_susu_gula_aren.jpg
+│   │       ├── kopi_americano.jpg
+│   │       └── matcha_latte.jpg
+│
+├── pubspec.yaml
+```
