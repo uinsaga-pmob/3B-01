@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../shared/widgets/custom_app_bar.dart';
+import '../../../providers/auth_provider.dart';
 import 'list_transaksion.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -14,259 +17,288 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.currentUser;
+    final username = user?.username.split(' ').first ?? 'Pengguna';
+    final namaBisnis = user?.namaBisnis ?? 'UMKM Digital Helper';
+
+    // Data transaksi
     final transactions = showToday ? todayTransactions : allTransactions;
-    final totalIncome = _calculateTotalIncome(transactions); 
-    final totalExpense = _calculateTotalExpense(transactions); 
+    final totalIncome = _calculateTotalIncome(transactions);
+    final totalExpense = _calculateTotalExpense(transactions);
     final balance = 1968634000;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFD), 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            
-            Container(
-              margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.blue.shade700,
-                    Colors.blue.shade600, 
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.shade200,
-                    blurRadius: 15,
-                    offset: const Offset(0, 4), 
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(24),
+      backgroundColor: const Color(0xFFF8FAFD),
+      body: Column(
+        children: [
+          CustomAppBar(
+            title: 'Dashboard',
+            showBackButton: false,
+            backgroundColor: const Color(0xFF004AAD),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            centerTitle: true,
+          ),
+          
+          Expanded(
+            child: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(230),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          LucideIcons.wallet,
-                          color: Colors.blue,
-                          size: 16,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Total Saldo',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildUserGreetingCard(username, namaBisnis),
+                  const SizedBox(height: 8),
+                  _buildSaldoCard(balance, totalIncome, totalExpense),
+                  const SizedBox(height: 16),
+                  _buildTabButtonSection(),
+                  const SizedBox(height: 16),
+                  _buildTransactionHeader(transactions),
                   const SizedBox(height: 12),
-                  Text(
-                    _formatCurrency(balance),
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
+                  SizedBox(
+                    child: TransactionList(
+                      transactions: transactions,
+                      showToday: showToday,
                     ),
                   ),
+                  
                   const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      _buildFinancialIndicator(
-                        title: 'Pemasukan',
-                        amount: totalIncome,
-                        isIncome: true,
-                        icon: LucideIcons.trendingUp,
-                      ),
-                      const SizedBox(width: 16),
-                      _buildFinancialIndicator(
-                        title: 'Pengeluaran',
-                        amount: totalExpense,
-                        isIncome: false, 
-                        icon: LucideIcons.trendingDown,
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
-
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100, 
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  _buildTabButton('Hari Ini', showToday),
-                  _buildTabButton('Semua Transaksi', !showToday),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Transaksi ${showToday ? 'Hari Ini' : 'Terbaru'}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    '${transactions.length} item${transactions.length != 1 ? 's' : ''}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Expanded(
-              child: TransactionList(
-                transactions: transactions,
-                showToday: showToday,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildUserGreetingCard(String username, String namaBisnis) {
     return Container(
-      height: 90, 
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade800, Colors.blue.shade600],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF004AAD),
+            const Color(0xFF0A4DA2),
+          ],
         ),
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.shade800.withAlpha(76),
-            blurRadius: 10,
+            color: const Color(0xFF004AAD).withAlpha(40),
+            blurRadius: 12,
             offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Avatar
+          Container(
+            width: 55,
+            height: 55,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(20),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset(
+                'assets/images/logo_umkm.png',
+                width: 55,
+                height: 55,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Center(
+                    child: Icon(
+                      Icons.store_rounded,
+                      color: const Color(0xFF004AAD),
+                      size: 30,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          
+          const SizedBox(width: 16),
+          
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Halo, $username! 👋🏻",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  namaBisnis,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Semangat mengelola bisnis hari ini!',
+                  style: TextStyle(
+                    color: Colors.white60,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          GestureDetector(
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Fitur notifikasi akan segera hadir!'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            },
+            child: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(64),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withAlpha(128), width: 1),
+              ),
+              child: const Icon(
+                LucideIcons.bell,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSaldoCard(int balance, int totalIncome, int totalExpense) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF1E88E5),
+            Color(0xFF1565C0),
+            Color(0xFF0D47A1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1565C0).withAlpha(60),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Stack(
         children: [
-          Positioned(right: -10, top: -10, child: Container(width: 70, height: 70, decoration: BoxDecoration(color: Colors.white.withAlpha(51), shape: BoxShape.circle))),
-          Positioned(right: 25, bottom: -15, child: Container(width: 50, height: 50, decoration: BoxDecoration(color: Colors.white.withAlpha(38), shape: BoxShape.circle))),
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(13),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            left: -30,
+            bottom: -30,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(13),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
           
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 25, 16, 16),
-            child: Row(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  margin: const EdgeInsets.only(right: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(20),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(30),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/logo_umkm.png',
-                      width: 44,
-                      height: 44,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.bar_chart_rounded,
-                            color: Colors.blue,
-                            size: 22,
-                          ),
-                        );
-                      },
+                      child: const Icon(
+                        LucideIcons.wallet,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Total Saldo',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _formatCurrency(balance),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Halo Syahroni Kopi👋🏻", 
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "Dashboard & Statistik",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          height: 1.1,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(64), 
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withAlpha(128), width: 1.5),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      const Icon(LucideIcons.bell, color: Colors.white, size: 22),
-                    ],
-                  ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    _buildFinancialIndicator(
+                      title: 'Pemasukan',
+                      amount: totalIncome,
+                      isIncome: true,
+                      icon: LucideIcons.trendingUp,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildFinancialIndicator(
+                      title: 'Pengeluaran',
+                      amount: totalExpense,
+                      isIncome: false, 
+                      icon: LucideIcons.trendingDown,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -282,16 +314,15 @@ class _DashboardPageState extends State<DashboardPage> {
     required bool isIncome,
     required IconData icon,
   }) {
-    final color = isIncome ? Colors.green.shade100 : Colors.red.shade100;
-    final textColor = isIncome ? Colors.green.shade800 : Colors.red.shade800;
-    final iconColor = isIncome ? Colors.green.shade600 : Colors.red.shade600;
+    final color = isIncome ? Colors.green.shade400 : Colors.red.shade400;
+    final bgColor = isIncome ? Colors.green.shade50 : Colors.red.shade50;
     final symbol = isIncome ? '+' : '-';
 
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withAlpha(230), 
+          color: bgColor.withAlpha(230),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -299,23 +330,16 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 14,
-                  ),
+                Icon(
+                  icon,
+                  color: color,
+                  size: 14,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.grey.shade700,
                     fontWeight: FontWeight.w500,
                   ),
@@ -326,14 +350,31 @@ class _DashboardPageState extends State<DashboardPage> {
             Text(
               '$symbol ${_formatCurrency(amount)}',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: textColor,
+                color: isIncome ? Colors.green.shade800 : Colors.red.shade800,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTabButtonSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          _buildTabButton('Hari Ini', showToday),
+          _buildTabButton('Semua Transaksi', !showToday),
+        ],
       ),
     );
   }
@@ -347,28 +388,45 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isActive ? Colors.blue.shade700 : Colors.transparent,
+            color: isActive ? const Color(0xFF004AAD) : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: Colors.blue.shade200,
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
           ),
           child: Text(
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isActive ? Colors.white : Colors.grey.shade700,
+              color: isActive ? Colors.white : Colors.grey.shade600,
               fontWeight: FontWeight.w600,
               fontSize: 13,
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTransactionHeader(List<Map<String, dynamic>> transactions) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Transaksi ${showToday ? 'Hari Ini' : 'Terbaru'}',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          Text(
+            '${transactions.length} item${transactions.length != 1 ? 's' : ''}',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
       ),
     );
   }

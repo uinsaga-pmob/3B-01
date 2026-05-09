@@ -1,69 +1,48 @@
-# Nama package aplikasi 
 name: umkm_digital_helper
-# Deskripsi aplikasi
-description: "Aplikasi UMKM Digital Helper untuk mengelola bisnis coffee shop"
+description: "Aplikasi Warungku untuk mengelola bisnis kecil kecilan"
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none' 
 
 version: 1.0.0+1
 environment:
   sdk: ^3.9.2 
 
-# Package yang diperlukan untuk build aplikasi
 dependencies:
-  # Flutter SDK core - framework utama untuk development
   flutter:
     sdk: flutter
-  
-  # Package icons dengan design style Apple Cupertino
-  # Digunakan untuk konsistensi design iOS-like components
-  cupertino_icons: ^1.0.8
-  
-  # Package icons modern dan konsisten (Lucide Design System)
-  # Menyediakan icon set yang digunakan di seluruh aplikasi
-  lucide_icons: ^0.257.0
-  
-  # Package internationalization dan formatting
-  # Digunakan untuk format currency (Rupiah), dates, dan localization
-  intl: ^0.18.1
-  
-  # Package untuk load, cache, dan display gambar dari internet
-  # Digunakan di ProductList untuk gambar produk dengan optimasi caching
-  # dan fallback mechanism saat offline
-  cached_network_image: ^3.3.0 
-  
-  # Package untuk mendeteksi status koneksi internet
-  # Digunakan untuk smart image loading (online/offline mode) di halaman produk
-  connectivity_plus: ^5.0.1 
 
-  # Package untuk visualisasi data menggunakan chart
-  # Digunakan di halaman statistik untuk menampilkan data penjualan
+  cupertino_icons: ^1.0.8
+  lucide_icons: ^0.257.0
+  cached_network_image: ^3.3.0 
+  connectivity_plus: ^5.0.1 
   fl_chart: ^0.65.0
 
-# Package yang diperlukan untuk development
+  #database
+  sqflite: ^2.4.2
+  path_provider: ^2.1.5
+  path: ^1.9.1
+  image_picker: ^1.2.2
+
+  #state management
+  provider: ^6.1.5
+
+  #menyimpan sesi login 
+  shared_preferences: ^2.5.5
+
+
+
 dev_dependencies:
-  # Framework testing untuk Flutter - digunakan untuk unit test dan widget test
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  
-  # Package untuk generate app icons otomatis dari source image
-  # Memudahkan proses pembuatan berbagai ukuran icon untuk Android/iOS
   flutter_launcher_icons: ^0.13.1
 
   
-
-# Konfigurasi Flutter specific
 flutter:
-  # Mengaktifkan Material Design components
-  # Memberikan akses ke widget-widget Material Design seperti AppBar, Card, dll
   uses-material-design: true
-
-  # Daftar assets (gambar, fonts) yang akan di-bundle dengan aplikasi
-  # File-file ini akan di compress dan included dalam build final
   assets:
-    - assets/logo_umkm.png              # Logo utama untuk UI aplikasi (splash screen, header)
-    - assets/logo_apk.png               # Logo khusus untuk app icon/launcher icon
+    - assets/images/logo_umkm.png      
+    - assets/images/logo_apk.png
     - assets/produk/matcha_latte.jpg   
     - assets/produk/kopi_susu_gula_aren.jpg 
     - assets/produk/kopi_americano.jpg 
@@ -74,18 +53,10 @@ flutter:
     - assets/produk/kukis.jpg
     - assets/produk/v60.jpg
 
-# Konfigurasi auto-generate app icons
+# Konfigurasi auto generate app icons
 flutter_launcher_icons:
-  # Generate icons untuk platform Android
   android: true
-  # Path ke source image yang akan digunakan sebagai dasar app icon
-  # File ini akan di-resize otomatis ke berbagai ukuran yang diperlukan
-  image_path: "assets/logo_apk.png"
-  # Foreground image untuk adaptive icons (Android 8.0+)
-  # Menentukan shape icon yang akan ditampilkan di launcher
-  adaptive_icon_foreground: "assets/logo_apk.png"
-  # Background color untuk adaptive icons 
+  image_path: "assets/images/logo_apk.png"
+  adaptive_icon_foreground: "assets/images/logo_apk.png"
   adaptive_icon_background: "#FFFFFF"
 
-# Jalankan perintah flutter pub run flutter_launcher_icons:main 
-# untuk generate app icons otomatis

@@ -1,9 +1,30 @@
 import 'package:flutter/material.dart';
-import 'screens/auth/login_page.dart';
+import 'package:provider/provider.dart';
+import 'database/database_helper.dart';
+import 'providers/auth_provider.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
 import 'screens/pages/main_page.dart';
-import 'screens/splashscreen/splashscreen.dart';
-void main() {
-  runApp(const MyApp()); 
+import 'screens/splash/splashscreen.dart';
+
+void main() async {
+  // Pastikan widget binding terinisialisasi
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inisialisasi database
+  await _initDatabase();
+  
+  runApp(const MyApp());
+}
+
+Future<void> _initDatabase() async {
+  try {
+    final dbHelper = DatabaseHelper();
+    await dbHelper.database;
+    debugPrint('Database initialized successfully');
+  } catch (e) {
+    debugPrint('Database initialization failed: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -11,16 +32,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false, 
-      title: 'UMKM Digital Helper', 
-      initialRoute: '/splash', // Route pertama yang dijalankan saat app start
-      routes: {
-        // Mendefinisikan routing aplikasi
-        '/splash': (context) => const SplashScreen(), // Splashscreen/loading
-        '/login': (context) => const LoginPage(), // Halaman login
-        '/main': (context) => const MainPage(), // Navigasi ke beberapa halaman 
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'UMKM Digital Helper',
+        initialRoute: '/splash',
+        routes: {
+          '/splash': (context) => const SplashScreen(),
+          '/register' : (context) => const RegisterScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/main': (context) => const MainPage(),
+        },
+      ),
     );
   }
 }

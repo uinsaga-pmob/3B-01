@@ -1,118 +1,101 @@
 import 'package:flutter/material.dart';
-import 'register_page.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 
-// Halaman Login dengan validasi input
-// Menggunakan StatefulWidget karena memerlukan state management untuk form
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  // Controller untuk menangkap input dari TextField
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  // Key untuk form validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  // Flag untuk menampilkan/ menyembunyikan password
   bool _obscurePassword = true;
 
-  // Flag untuk loading state
-  bool _isLoading = false;
-
-  // Method untuk menampilkan snackbar dengan pesan tertentu
-  void _showSnackBar(String message, {bool isSuccess = true}) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 2),
-        backgroundColor: isSuccess ? Colors.green : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
-  // Method untuk validasi login
-  Future<void> _handleLogin() async {
-    // Validasi form terlebih dahulu
-    if (_formKey.currentState!.validate()) {
-      if (!mounted) return;
-
-      setState(() {
-        _isLoading = true;
-      });
-
-      try {
-        // Simulasi proses login
-        await Future.delayed(const Duration(milliseconds: 800));
-
-        if (!mounted) return;
-
-        // Tampilkan snackbar sukses
-        _showSnackBar('Login berhasil! Selamat datang kembali.');
-
-        // Navigasi ke main page
-        Navigator.pushReplacementNamed(context, '/main');
-      } catch (e) {
-        if (!mounted) return;
-        // Tampilkan snackbar error jika login gagal
-        _showSnackBar(
-          'Terjadi kesalahan. Silakan coba lagi.',
-          isSuccess: false,
-        );
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      }
-    }
-  }
-
-  // Method untuk toggle visibility password
   void _togglePasswordVisibility() {
     setState(() {
       _obscurePassword = !_obscurePassword;
     });
   }
 
+  Future<void> _handleLogin() async {
+    if (_formKey.currentState!.validate()) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      
+      final success = await authProvider.login(
+        _usernameController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Login berhasil! Selamat datang kembali.'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+          Navigator.pushReplacementNamed(context, '/main');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage ?? 'Login gagal'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Form(
-          key: _formKey, // Key untuk form validation
+          key: _formKey,
           child: Column(
             children: [
               const SizedBox(height: 80),
 
-              // Logo aplikasi
               Center(
                 child: Image.asset(
-                  'assets/logo_umkm.png',
+                  'assets/images/logo_apk.png',
                   height: 180,
                   fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(
+                      Icons.store,
+                      size: 180,
+                      color: Color(0xFF004AAD),
+                    );
+                  },
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              // Form input section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title
                     const Text(
                       "Masuk Ke Akun Anda",
                       style: TextStyle(
@@ -124,16 +107,15 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 25),
 
-                    // Email/Phone input field
                     const Text(
-                      "Email atau Nomor HP",
+                      "Username",
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-                      controller: emailController,
+                      controller: _usernameController,
                       decoration: InputDecoration(
-                        hintText: 'contoh@email.com atau 081234567890',
+                        hintText: 'Masukkan username',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: const BorderSide(color: Colors.grey),
@@ -148,41 +130,29 @@ class _LoginPageState extends State<LoginPage> {
                           horizontal: 15,
                           vertical: 12,
                         ),
-                        prefixIcon: const Icon(Icons.email_outlined),
+                        prefixIcon: const Icon(Icons.person_outline),
                       ),
-                      keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Email atau nomor HP harus diisi';
+                          return 'Username harus diisi';
                         }
-
-                        // Validasi format email atau nomor HP
-                        final emailRegex = RegExp(
-                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-                        );
-                        final phoneRegex = RegExp(r'^[0-9]{10,13}$');
-
-                        if (!emailRegex.hasMatch(value) &&
-                            !phoneRegex.hasMatch(
-                              value.replaceAll(RegExp(r'\s+'), ''),
-                            )) {
-                          return 'Format email atau nomor HP tidak valid';
+                        if (value.length < 3) {
+                          return 'Username minimal 3 karakter';
                         }
                         return null;
                       },
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 15),
 
-                    // Password input field
                     const Text(
                       "Password",
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-                      controller: passwordController,
+                      controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         hintText: 'Masukkan password',
@@ -224,14 +194,15 @@ class _LoginPageState extends State<LoginPage> {
                       onFieldSubmitted: (_) => _handleLogin(),
                     ),
 
-                    // Forgot password link
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          _showSnackBar(
-                            'Fitur lupa password akan segera hadir!',
-                            isSuccess: false,
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Fitur lupa password akan segera hadir!'),
+                              backgroundColor: Colors.orange,
+                            ),
                           );
                         },
                         child: const Text(
@@ -246,21 +217,19 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 20),
 
-                    // Tombol login
                     SizedBox(
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleLogin,
+                        onPressed: authProvider.isLoading ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF0A4DA2),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                           elevation: 2,
-                          shadowColor: const Color.fromARGB(255, 10, 77, 162),
                         ),
-                        child: _isLoading
+                        child: authProvider.isLoading
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
@@ -284,7 +253,6 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 20),
 
-                    // Register link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -294,12 +262,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const RegisterPage(),
-                              ),
-                            );
+                            Navigator.pushReplacementNamed(context, '/register');
                           },
                           child: const Text(
                             "Daftar Disini",
@@ -323,7 +286,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Footer dengan social login options
   Widget _buildFooter() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -335,120 +297,58 @@ class _LoginPageState extends State<LoginPage> {
           ),
           const SizedBox(height: 16),
 
-          // Social login buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Facebook Button
-              InkWell(
+              _buildSocialButton(
+                icon: Icons.facebook,
+                color: const Color(0xFF1877F2),
                 onTap: () {
-                  _showSnackBar(
-                    'Login dengan Facebook akan segera hadir!',
-                    isSuccess: false,
-                  );
-                },
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1877F2),
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1877F2).withAlpha(76),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.facebook,
-                    color: Colors.white,
-                    size: 26,
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 16),
-
-              // Google Button
-              InkWell(
-                onTap: () {
-                  _showSnackBar(
-                    'Login dengan Google akan segera hadir!',
-                    isSuccess: false,
-                  );
-                },
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(25),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                    border: Border.all(color: Colors.grey.shade300, width: 1),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'G',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontFamily: 'Roboto',
-                      ),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Login dengan Facebook akan segera hadir!'),
+                      backgroundColor: Colors.orange,
                     ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 16),
-
-              // Apple Button
-              InkWell(
-                onTap: () {
-                  _showSnackBar(
-                    'Login dengan Apple akan segera hadir!',
-                    isSuccess: false,
                   );
                 },
-                borderRadius: BorderRadius.circular(25),
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(76),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(Icons.apple, color: Colors.white, size: 26),
-                ),
+              ),
+              const SizedBox(width: 16),
+              _buildSocialButton(
+                text: 'G',
+                color: Colors.white,
+                textColor: Colors.black,
+                borderColor: Colors.grey.shade300,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Login dengan Google akan segera hadir!'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(width: 16),
+              _buildSocialButton(
+                icon: Icons.apple,
+                color: Colors.black,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Login dengan Apple akan segera hadir!'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                },
               ),
             ],
           ),
 
           const SizedBox(height: 20),
-
           Divider(color: Colors.grey.shade300, height: 1),
-
           const SizedBox(height: 16),
 
           Text(
-            "Butuh bantuan? Hubungi support@umkmdigital.com",
+            "Butuh bantuan? Hubungi support@warungku.com",
             style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
             textAlign: TextAlign.center,
           ),
@@ -457,11 +357,47 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  @override
-  void dispose() {
-    // Clean up controllers untuk menghindari memory leak
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
+  Widget _buildSocialButton({
+    IconData? icon,
+    String? text,
+    required Color color,
+    Color textColor = Colors.white,
+    Color? borderColor,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(25),
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(25),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: borderColor != null
+              ? Border.all(color: borderColor, width: 1)
+              : null,
+        ),
+        child: Center(
+          child: icon != null
+              ? Icon(icon, color: textColor, size: 26)
+              : Text(
+                  text ?? '',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+        ),
+      ),
+    );
   }
 }

@@ -1,112 +1,94 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../models/user_model.dart';
+import '../../providers/auth_provider.dart';
 
-// Halaman Registrasi dengan validasi lengkap
-// Mengimplementasikan form validation untuk semua field required
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
-  // Controller untuk input field
-  final TextEditingController _namaUsahaController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _namaBisnisController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _konfirmasiPasswordController =
-      TextEditingController();
+  final TextEditingController _konfirmasiPasswordController = TextEditingController();
 
-  // Key untuk form validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // Flags untuk password visibility
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  // Flag untuk loading state
-  bool _isLoading = false;
-
-  // Method untuk menampilkan snackbar
-  void _showSnackBar(String message, {bool isSuccess = true}) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 2),
-        backgroundColor: isSuccess ? Colors.green : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _namaBisnisController.dispose();
+    _passwordController.dispose();
+    _konfirmasiPasswordController.dispose();
+    super.dispose();
   }
 
-  // Method untuk handle registrasi
-  Future<void> _handleRegister() async {
-    // Validasi form
-    if (_formKey.currentState!.validate()) {
-      // Validasi tambahan: password match
-      if (_passwordController.text != _konfirmasiPasswordController.text) {
-        _showSnackBar(
-          'Password dan konfirmasi password tidak cocok',
-          isSuccess: false,
-        );
-        return;
-      }
-
-      if (!mounted) return;
-
-      setState(() {
-        _isLoading = true;
-      });
-
-      try {
-        // Simulasi proses registrasi
-        await Future.delayed(const Duration(milliseconds: 800));
-
-        if (!mounted) return;
-
-        // Tampilkan snackbar sukses
-        _showSnackBar(
-          'Pendaftaran berhasil! Akun ${_namaUsahaController.text} telah dibuat.',
-        );
-
-        // Navigasi ke main page
-        Navigator.pushReplacementNamed(context, '/main');
-      } catch (e) {
-        if (!mounted) return;
-
-        _showSnackBar(
-          'Terjadi kesalahan. Silakan coba lagi.',
-          isSuccess: false,
-        );
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      }
-    }
-  }
-
-  // Toggle password visibility
   void _togglePasswordVisibility() {
     setState(() {
       _obscurePassword = !_obscurePassword;
     });
   }
 
-  // Toggle confirm password visibility
   void _toggleConfirmPasswordVisibility() {
     setState(() {
       _obscureConfirmPassword = !_obscureConfirmPassword;
     });
   }
 
+  Future<void> _handleRegister() async {
+    if (_formKey.currentState!.validate()) {
+      if (_passwordController.text != _konfirmasiPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password dan konfirmasi password tidak cocok'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      final user = UserModel(
+        username: _usernameController.text.trim(),
+        password: _passwordController.text.trim(),
+        namaBisnis: _namaBisnisController.text.trim(),
+      );
+
+      final success = await authProvider.register(user);
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Pendaftaran berhasil! Selamat datang ${_namaBisnisController.text}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pushReplacementNamed(context, '/main');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage ?? 'Pendaftaran gagal'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -114,20 +96,25 @@ class _RegisterPageState extends State<RegisterPage> {
           key: _formKey,
           child: Column(
             children: [
-              const SizedBox(height: 60),
+              const SizedBox(height: 40),
 
-              // Logo aplikasi
               Center(
                 child: Image.asset(
-                  'assets/logo_umkm.png',
-                  height: 160,
+                  'assets/images/logo_apk.png',
+                  height: 100,
                   fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(
+                      Icons.store,
+                      size: 100,
+                      color: Color(0xFF004AAD),
+                    );
+                  },
                 ),
               ),
 
-              const SizedBox(height: 5),
+              const SizedBox(height: 10),
 
-              // Judul dan subjudul
               const Text(
                 'Daftar Akun Baru',
                 style: TextStyle(
@@ -148,30 +135,53 @@ class _RegisterPageState extends State<RegisterPage> {
 
               const SizedBox(height: 25),
 
-              // Form Input
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Nama Usaha Field
                     const Text(
-                      'Nama Usaha',
+                      'Username *',
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 5),
                     TextFormField(
-                      controller: _namaUsahaController,
+                      controller: _usernameController,
                       decoration: _inputDecoration(
-                        'Contoh: Kopi Kenangan',
+                        'Masukkan username',
+                        icon: Icons.person_outline,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Username harus diisi';
+                        }
+                        if (value.length < 3) {
+                          return 'Username minimal 3 karakter';
+                        }
+                        return null;
+                      },
+                      textInputAction: TextInputAction.next,
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    const Text(
+                      'Nama Bisnis *',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 5),
+                    TextFormField(
+                      controller: _namaBisnisController,
+                      decoration: _inputDecoration(
+                        'Contoh: Warung Kopi Kita',
                         icon: Icons.store_outlined,
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Nama usaha harus diisi';
+                          return 'Nama bisnis harus diisi';
                         }
                         if (value.length < 3) {
-                          return 'Nama usaha minimal 5 karakter';
+                          return 'Nama bisnis minimal 3 karakter';
                         }
                         return null;
                       },
@@ -180,47 +190,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                     const SizedBox(height: 15),
 
-                    // Email/Phone Field
                     const Text(
-                      'Email atau Nomor HP',
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 5),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: _inputDecoration(
-                        'contoh@gmail.com atau 081234567890',
-                        icon: Icons.email_outlined,
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Email atau nomor HP harus diisi';
-                        }
-
-                        // Validasi format email atau nomor HP
-                        final emailRegex = RegExp(
-                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-                        );
-                        final phoneRegex = RegExp(r'^[0-9]{10,13}$');
-
-                        if (!emailRegex.hasMatch(value) &&
-                            !phoneRegex.hasMatch(
-                              value.replaceAll(RegExp(r'\s+'), ''),
-                            )) {
-                          return 'Format email atau nomor HP tidak valid';
-                        }
-
-                        return null;
-                      },
-                      textInputAction: TextInputAction.next,
-                    ),
-
-                    const SizedBox(height: 15),
-
-                    // Password Field
-                    const Text(
-                      'Password',
+                      'Password *',
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 5),
@@ -254,9 +225,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                     const SizedBox(height: 15),
 
-                    // Konfirmasi Password Field
                     const Text(
-                      'Konfirmasi Password',
+                      'Konfirmasi Password *',
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 5),
@@ -286,11 +256,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       onFieldSubmitted: (_) => _handleRegister(),
                     ),
 
-                    // Password requirements hint
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        '• Password minimal 6 karakter\n• Gunakan kombinasi huruf dan angka',
+                        '• Password minimal 6 karakter\n• Gunakan kombinasi huruf dan angka untuk keamanan',
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey.shade600,
@@ -300,21 +269,19 @@ class _RegisterPageState extends State<RegisterPage> {
 
                     const SizedBox(height: 25),
 
-                    // Tombol daftar
                     SizedBox(
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleRegister,
+                        onPressed: authProvider.isLoading ? null : _handleRegister,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF004AAD),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                           elevation: 2,
-                          shadowColor: const Color.fromARGB(255, 0, 74, 173),
                         ),
-                        child: _isLoading
+                        child: authProvider.isLoading
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
@@ -338,7 +305,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
                     const SizedBox(height: 15),
 
-                    // Terms and conditions
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
@@ -353,17 +319,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
                     const SizedBox(height: 15),
 
-                    // Link untuk login
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
-                          'Sudah punya Akun? ',
+                          'Sudah punya akun? ',
                           style: TextStyle(color: Colors.black54),
                         ),
                         GestureDetector(
                           onTap: () {
-                            Navigator.pop(context); // Kembali ke halaman login
+                            Navigator.pushReplacementNamed(context, '/login');
                           },
                           child: const Text(
                             'Masuk di sini',
@@ -378,7 +343,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -386,7 +351,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Fungsi bantu untuk dekorasi input field
   InputDecoration _inputDecoration(
     String hintText, {
     IconData? icon,
@@ -406,15 +370,5 @@ class _RegisterPageState extends State<RegisterPage> {
       prefixIcon: icon != null ? Icon(icon, color: Colors.grey.shade600) : null,
       suffixIcon: suffixIcon,
     );
-  }
-
-  @override
-  void dispose() {
-    // Clean up semua controller
-    _namaUsahaController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _konfirmasiPasswordController.dispose();
-    super.dispose();
   }
 }

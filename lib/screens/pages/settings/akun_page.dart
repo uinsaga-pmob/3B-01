@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../auth/login_page.dart';
+import '../../auth/login_screen.dart';
 
 class AkunPage extends StatelessWidget {
   const AkunPage({super.key});
@@ -463,13 +463,11 @@ class AkunPage extends StatelessWidget {
     );
   }
 
-  // Method untuk navigasi ke login page dengan clear navigation stack
   void _navigateToLoginPage(BuildContext context) {
-    // Menggunakan pushAndRemoveUntil untuk clear semua halaman sebelumnya
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-      (Route<dynamic> route) => false, // Hapus semua route
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (Route<dynamic> route) => false, 
     );
   }
 }

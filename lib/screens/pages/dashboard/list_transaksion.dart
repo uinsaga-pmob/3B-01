@@ -101,21 +101,25 @@ class TransactionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return transactions.isEmpty
-        ? _buildEmptyState(showToday)
-        : ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: transactions.length,
-            itemBuilder: (context, index) {
-              final trx = transactions[index];
-              return _buildTransactionCard(
-                trx['title'],
-                trx['date'],
-                trx['amount'],
-                trx['isIncome'],
-              );
-            },
-          );
+    if (transactions.isEmpty) {
+      return _buildEmptyState(showToday);
+    }
+    
+    return ListView.builder(
+      shrinkWrap: true, 
+      physics: const NeverScrollableScrollPhysics(), 
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: transactions.length,
+      itemBuilder: (context, index) {
+        final trx = transactions[index];
+        return _buildTransactionCard(
+          trx['title'],
+          trx['date'],
+          trx['amount'],
+          trx['isIncome'],
+        );
+      },
+    );
   }
 
   Widget _buildTransactionCard(
