@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../widgets/snackbar_services.dart';
 import '../../core/constants/colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
@@ -58,12 +59,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _saveProfile() async {
     if (_nameController.text.trim().isEmpty) {
-      _showSnackBar("Nama tidak boleh kosong", Colors.orange);
+      SnackbarService.error(context: context, message: "Nama tidak boleh kosong");
       return;
     }
     
     if (_storeNameController.text.trim().isEmpty) {
-      _showSnackBar("Nama toko tidak boleh kosong", Colors.orange);
+      SnackbarService.warning(context: context, message: "Nama toko tidak boleh kosong");
       return;
     }
 
@@ -91,23 +92,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _profileImagePath = finalImagePath;
           _newImageFile = null;
         });
-        _showSnackBar("Profil berhasil diperbarui", Colors.green);
+        SnackbarService.success(context: context, message: "Profil berhasil diperbarui");
       } else {
-        _showSnackBar("Gagal memperbarui profil", Colors.red);
+        SnackbarService.error(context: context, message: "Gagal memperbarui profil");
       }
     }
-  }
-
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   Future<void> _logout() async {
@@ -212,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() => _isLoading = false);
       
       if (mounted) {
-        _showSnackBar("Database berhasil direset", Colors.orange);
+        SnackbarService.warning(context: context, message: "Database berhasil direset");
       }
     }
   }

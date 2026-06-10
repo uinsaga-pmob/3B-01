@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../widgets/snackbar_services.dart';
 import '../../core/constants/colors.dart';
 import '../../models/product_model.dart';
 import '../../providers/product_provider.dart';
@@ -68,8 +69,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
   // Helper untuk menampilkan dialog error
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    SnackbarService.error(
+      context: context,
+      message: message,
     );
   }
 
@@ -93,7 +95,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       return;
     }
     if (costPrice == null) {
-      _showError('Harga modal harus angka');
+      _showError('Harga beli harus angka');
       return;
     }
     if (sellPrice == null) {
@@ -111,7 +113,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       return;
     }
     if (costPrice < 0) {
-      _showError('Harga modal tidak boleh negatif');
+      _showError('Harga beli tidak boleh negatif');
       return;
     }
     if (sellPrice < 0) {
@@ -154,23 +156,20 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            widget.product == null
-                ? "Produk berhasil ditambahkan"
-                : "Produk berhasil diupdate",
-          ),
-          backgroundColor: Colors.green,
-        ),
+      SnackbarService.success(
+        context: context,
+        message: widget.product == null
+            ? "Produk berhasil ditambahkan"
+            : "Produk berhasil diupdate",
       );
       Navigator.pop(context, true);
     } else {
       final errorMsg =
           productProvider.errorMessage ??
           "Gagal menyimpan produk. Kode SKU mungkin sudah terdaftar.";
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
+      SnackbarService.error(
+        context: context,
+        message: errorMsg,
       );
     }
   }
@@ -234,7 +233,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     return Scaffold(
       body: Column(
         children: [
-          CustomAppBar(title: isEdit ? "Edit Produk" : "Tambah Produk Baru"),
+          CustomAppBar(title: isEdit ? "Edit Produk" : "Tambah Produk Baru", showBackButton: true),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -420,15 +419,15 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                         Expanded(
                           child: _buildTextField(
                             controller: _costPriceController,
-                            label: "Harga Modal",
+                            label: "Harga beli",
                             hint: "0",
                             icon: Icons.attach_money_rounded,
                             keyboardType: TextInputType.number,
                             validator: (val) {
                               if (val == null || val.isEmpty)
-                                return 'Harga modal harus diisi';
+                                return 'Harga beli harus diisi';
                               if (double.tryParse(val) == null)
-                                return 'Harga modal harus angka';
+                                return 'Harga beli harus angka';
                               return null;
                             },
                           ),

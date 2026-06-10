@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smart_inventory/models/product_model.dart';
+import '../../widgets/snackbar_services.dart';
 import '../../core/constants/colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../providers/product_provider.dart';
@@ -435,12 +436,10 @@ class _ProdukScreenState extends State<ProdukScreen> {
       final success = await productProvider.deleteProduct(id);
       
       // ✅ Perbaikan: Cek mounted sebelum menggunakan context
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success ? "Produk berhasil dihapus" : "Gagal menghapus produk"),
-            backgroundColor: success ? Colors.green : Colors.red,
-          ),
+      if (context.mounted) {
+        SnackbarService.success(
+          context: context,
+          message: success ? "Produk berhasil dihapus" : "Gagal menghapus produk",
         );
         if (success) {
           await _refreshData();

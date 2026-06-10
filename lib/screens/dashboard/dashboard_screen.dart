@@ -12,7 +12,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/stat_card.dart';
-import '../produk/produk_detail_screen.dart';
+// import '../produk/produk_detail_screen.dart';
 import '../profile/profile_screen.dart';
 import '../mutasi/mutasi_screen.dart';
 
@@ -724,25 +724,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     "Sisa: ${product.stock} unit (Min: ${product.minStock})",
                                     style: const TextStyle(color: AppColors.danger),
                                   ),
-                                  trailing: ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => ProductDetailScreen(productId: product.id!),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.add_shopping_cart, size: 18),
-                                    label: const Text("Isi Stok"),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.danger,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                  ),
+                                  // trailing: ElevatedButton.icon(
+                                  //   onPressed: () {
+                                  //     Navigator.push(
+                                  //       context,
+                                  //       MaterialPageRoute(
+                                  //         builder: (_) => ProductDetailScreen(productId: product.id!),
+                                  //       ),
+                                  //     );
+                                  //   },
+                                  //   icon: const Icon(Icons.add_shopping_cart, size: 18),
+                                  //   label: const Text("Isi Stok"),
+                                  //   style: ElevatedButton.styleFrom(
+                                  //     backgroundColor: AppColors.danger,
+                                  //     foregroundColor: Colors.white,
+                                  //     shape: RoundedRectangleBorder(
+                                  //       borderRadius: BorderRadius.circular(12),
+                                  //     ),
+                                  //   ),
+                                  // ),
                                 ),
                               ))
                           .toList(),

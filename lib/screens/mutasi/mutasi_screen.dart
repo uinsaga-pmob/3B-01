@@ -653,7 +653,7 @@ class _MutasiScreenState extends State<MutasiScreen> {
               const SizedBox(height: 16),
               _buildDetailRow("Jumlah", "${item.quantity} Unit"),
               const SizedBox(height: 12),
-              _buildDetailRow("Nilai Modal", AppFormatters.toRupiah(totalCostValue)),
+              _buildDetailRow("Nilai beli", AppFormatters.toRupiah(totalCostValue)),
               const SizedBox(height: 12),
               _buildDetailRow("Nilai Jual", AppFormatters.toRupiah(totalSellValue)),
               const SizedBox(height: 12),

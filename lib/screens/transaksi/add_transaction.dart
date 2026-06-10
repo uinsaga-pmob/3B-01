@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
+import '../../widgets/snackbar_services.dart';
 import '../../core/constants/colors.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/supplier_provider.dart';
@@ -37,19 +37,25 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   // Product selection
   Product? _selectedProduct;
-  final _quantityController = TextEditingController();
-  final _priceController = TextEditingController();
 
   // Form untuk produk baru (hanya untuk PEMBELIAN)
   bool _isAddingNewProduct = false;
   final _newProductCodeController = TextEditingController();
   final _newProductNameController = TextEditingController();
   final _newProductCategoryController = TextEditingController();
+  final _newProductQuantityController = TextEditingController();
+  final _newProductPriceController = TextEditingController();
   final _newProductSellPriceController = TextEditingController();
+
+  // Listeners untuk real-time button state
+  final _quantityFocusNode = FocusNode();
+  final _priceFocusNode = FocusNode();
 
   // UI state
   bool _isLoading = true;
   bool _isSubmitting = false;
+  bool _isFormValid = false;
+  bool _isNewProductFormValid = false;
 
   final List<String> _paymentMethods = [
     'Tunai',
@@ -64,9 +70,28 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   void initState() {
     super.initState();
-    // Load data setelah frame selesai
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
+    });
+  }
+
+  void _updateFormValidState() {
+    setState(() {
+      _isFormValid = _selectedProduct != null &&
+          _newProductQuantityController.text.isNotEmpty &&
+          _newProductPriceController.text.isNotEmpty;
+    });
+  }
+
+  void _updateNewProductFormValid() {
+    setState(() {
+      _isNewProductFormValid =
+          _newProductCodeController.text.isNotEmpty &&
+          _newProductNameController.text.isNotEmpty &&
+          _newProductCategoryController.text.isNotEmpty &&
+          _newProductQuantityController.text.isNotEmpty &&
+          _newProductPriceController.text.isNotEmpty &&
+          _newProductSellPriceController.text.isNotEmpty;
     });
   }
 
@@ -76,7 +101,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     try {
       final isPurchase = widget.transactionType == 'Pembelian';
 
-      // Load suppliers jika untuk pembelian
       if (isPurchase) {
         final supplierProvider = Provider.of<SupplierProvider>(
           context,
@@ -87,7 +111,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         }
       }
 
-      // Load products
       final productProvider = Provider.of<ProductProvider>(
         context,
         listen: false,
@@ -108,12 +131,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void dispose() {
     _customerNameController.dispose();
     _notesController.dispose();
-    _quantityController.dispose();
-    _priceController.dispose();
     _newProductCodeController.dispose();
     _newProductNameController.dispose();
     _newProductCategoryController.dispose();
+    _newProductQuantityController.dispose();
+    _newProductPriceController.dispose();
     _newProductSellPriceController.dispose();
+    _quantityFocusNode.dispose();
+    _priceFocusNode.dispose();
     super.dispose();
   }
 
@@ -123,7 +148,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final isPurchase = widget.transactionType == 'Pembelian';
     final title = isPurchase ? 'Tambah Pembelian' : 'Tambah Penjualan';
 
-    // Jika masih loading
     if (_isLoading) {
       return Scaffold(
         backgroundColor: isDark
@@ -196,16 +220,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             _buildHeaderCard(isDark, isPurchase),
             const SizedBox(height: 16),
 
-            // Supplier Section (hanya untuk PEMBELIAN)
             if (isPurchase && suppliers.isNotEmpty)
               _buildSupplierSection(isDark, suppliers),
 
-            // Customer Section (hanya untuk PENJUALAN)
             if (!isPurchase) _buildCustomerSection(isDark),
 
             const SizedBox(height: 16),
 
-            // Products Section
             _buildProductsSection(isDark, products, isPurchase),
             const SizedBox(height: 16),
 
@@ -411,7 +432,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     List<Product> products,
     bool isPurchase,
   ) {
-    // Untuk penjualan, hanya tampilkan produk yang punya stok > 0
     final availableProducts = isPurchase
         ? products
         : products.where((p) => p.stock > 0).toList();
@@ -422,7 +442,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             children: [
               Icon(
@@ -444,7 +463,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
           const SizedBox(height: 12),
 
-          // Pilihan mode (hanya untuk pembelian)
           if (isPurchase && products.isNotEmpty) ...[
             Row(
               children: [
@@ -457,6 +475,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       setState(() {
                         _isAddingNewProduct = false;
                         _selectedProduct = null;
+                        _isFormValid = false;
                         _clearNewProductForm();
                       });
                     },
@@ -472,6 +491,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       setState(() {
                         _isAddingNewProduct = true;
                         _selectedProduct = null;
+                        _isFormValid = false;
                       });
                     },
                   ),
@@ -481,13 +501,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             const SizedBox(height: 12),
           ],
 
-          // Dropdown produk
+          // Dropdown produk yang sudah ada
           if (!_isAddingNewProduct || !isPurchase)
             DropdownButtonFormField<Product>(
               value: _selectedProduct,
               isExpanded: true,
               menuMaxHeight: 350,
-
               selectedItemBuilder: (BuildContext context) {
                 return availableProducts.map((product) {
                   final price = isPurchase
@@ -509,7 +528,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   );
                 }).toList();
               },
-
               items: availableProducts.map((product) {
                 final price = isPurchase
                     ? product.costPrice
@@ -549,89 +567,101 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                 );
               }).toList(),
-
               onChanged: (value) {
                 setState(() {
                   _selectedProduct = value;
                   if (value != null) {
-                    final price = isPurchase
-                        ? value.costPrice
-                        : value.sellPrice;
-                    _priceController.text = price.toString();
+                    final price = isPurchase ? value.costPrice : value.sellPrice;
+                    _newProductPriceController.text = price.toString();
                   }
+                  _updateFormValidState();
                 });
               },
             ),
 
-          // Form tambah produk baru
-          if (isPurchase && _isAddingNewProduct) ...[
-            const SizedBox(height: 8),
-            _buildNewProductForm(isDark),
-          ],
-
-          const SizedBox(height: 12),
-
-          // Input jumlah, harga, dan tombol tambah
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _quantityController,
-                  keyboardType: TextInputType.number,
-                  decoration: _buildInputDecoration(
-                    isDark,
-                    'Jumlah',
-                    Icons.numbers,
-                  ),
-                  style: GoogleFonts.plusJakartaSans(
-                    color: isDark ? Colors.white : AppColors.primaryLight,
-                  ),
-                  enabled:
-                      (isPurchase && _isAddingNewProduct) ||
-                      _selectedProduct != null,
+          // Form untuk produk yang sudah dipilih (VERTICAL)
+          if (!_isAddingNewProduct && _selectedProduct != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: (isDark ? AppColors.accentDark : AppColors.accentLight)
+                    .withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: (isDark ? AppColors.accentDark : AppColors.accentLight)
+                      .withValues(alpha: 0.3),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextFormField(
-                  controller: _priceController,
-                  keyboardType: TextInputType.number,
-                  decoration: _buildInputDecoration(
-                    isDark,
-                    'Harga Satuan',
-                    Icons.price_change,
-                  ),
-                  style: GoogleFonts.plusJakartaSans(
-                    color: isDark ? Colors.white : AppColors.primaryLight,
-                  ),
-                  enabled:
-                      (isPurchase && _isAddingNewProduct) ||
-                      _selectedProduct != null,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: AppColors.emeraldGradient,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ElevatedButton(
-                  onPressed: _canAddItem(isPurchase) ? _addItem : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    elevation: 0,
-                    minimumSize: const Size(52, 54),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              child: Column(
+                children: [
+                  Text(
+                    isPurchase ? 'Detail Pembelian' : 'Detail Penjualan',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: isDark
+                          ? AppColors.accentDark
+                          : AppColors.accentLight,
                     ),
                   ),
-                  child: const Icon(Icons.add_rounded, color: Colors.white),
-                ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _newProductQuantityController,
+                    keyboardType: TextInputType.number,
+                    style: GoogleFonts.plusJakartaSans(
+                      color: isDark ? Colors.white : AppColors.primaryLight,
+                    ),
+                    decoration: _buildInputDecoration(
+                      isDark,
+                      'Jumlah *',
+                      Icons.numbers,
+                    ),
+                    onChanged: (_) => _updateFormValidState(),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _newProductPriceController,
+                    keyboardType: TextInputType.number,
+                    style: GoogleFonts.plusJakartaSans(
+                      color: isDark ? Colors.white : AppColors.primaryLight,
+                    ),
+                    decoration: _buildInputDecoration(
+                      isDark,
+                      'Harga Satuan *',
+                      Icons.price_change,
+                    ),
+                    onChanged: (_) => _updateFormValidState(),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isFormValid && !_isSubmitting
+                          ? _addExistingProduct
+                          : null,
+                      icon: const Icon(Icons.add_rounded, color: Colors.white),
+                      label: const Text('TAMBAHKAN KE DAFTAR'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accentLight,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
+
+          // Form tambah produk baru
+          if (isPurchase && _isAddingNewProduct) ...[
+            const SizedBox(height: 12),
+            _buildNewProductForm(isDark),
+          ],
         ],
       ),
     );
@@ -726,6 +756,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               'Kode Produk *',
               Icons.qr_code,
             ),
+            onChanged: (_) => _updateNewProductFormValid(),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -738,6 +769,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               'Nama Produk *',
               Icons.inventory_2,
             ),
+            onChanged: (_) => _updateNewProductFormValid(),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -750,6 +782,35 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               'Kategori *',
               Icons.category,
             ),
+            onChanged: (_) => _updateNewProductFormValid(),
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _newProductQuantityController,
+            keyboardType: TextInputType.number,
+            style: GoogleFonts.plusJakartaSans(
+              color: isDark ? Colors.white : AppColors.primaryLight,
+            ),
+            decoration: _buildInputDecoration(
+              isDark,
+              'Jumlah *',
+              Icons.numbers,
+            ),
+            onChanged: (_) => _updateNewProductFormValid(),
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _newProductPriceController,
+            keyboardType: TextInputType.number,
+            style: GoogleFonts.plusJakartaSans(
+              color: isDark ? Colors.white : AppColors.primaryLight,
+            ),
+            decoration: _buildInputDecoration(
+              isDark,
+              'Harga Beli *',
+              Icons.price_change,
+            ),
+            onChanged: (_) => _updateNewProductFormValid(),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -760,8 +821,28 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             ),
             decoration: _buildInputDecoration(
               isDark,
-              'Harga Jual (Opsional)',
-              Icons.price_change,
+              'Harga Jual *',
+              Icons.sell_rounded,
+            ),
+            onChanged: (_) => _updateNewProductFormValid(),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _isNewProductFormValid && !_isSubmitting
+                  ? _addNewProduct
+                  : null,
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text('TAMBAHKAN PRODUK'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accentLight,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
             ),
           ),
         ],
@@ -1118,48 +1199,40 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  bool _canAddItem(bool isPurchase) {
-    if (isPurchase && _isAddingNewProduct) {
-      return _newProductNameController.text.isNotEmpty &&
-          _newProductCodeController.text.isNotEmpty &&
-          _newProductCategoryController.text.isNotEmpty &&
-          _quantityController.text.isNotEmpty &&
-          _priceController.text.isNotEmpty;
-    } else {
-      return _selectedProduct != null &&
-          _quantityController.text.isNotEmpty &&
-          _priceController.text.isNotEmpty;
-    }
-  }
+  void _addNewProduct() {
+    final quantity = int.tryParse(_newProductQuantityController.text);
+    final unitPrice = double.tryParse(_newProductPriceController.text);
+    final sellPrice = double.tryParse(_newProductSellPriceController.text);
 
-  void _addItem() {
-    final isPurchase = widget.transactionType == 'Pembelian';
-    final quantity = int.tryParse(_quantityController.text);
-    final unitPrice = double.tryParse(_priceController.text);
-
-    if (quantity == null || unitPrice == null) return;
-
-    String productName;
-    String productCode;
-    int productId;
-    String? category;
-    double? sellPrice;
-
-    if (isPurchase && _isAddingNewProduct) {
-      productId = -DateTime.now().millisecondsSinceEpoch;
-      productName = _newProductNameController.text.trim();
-      productCode = _newProductCodeController.text.trim();
-      category = _newProductCategoryController.text.trim();
-      sellPrice = double.tryParse(_newProductSellPriceController.text);
-    } else {
-      productId = _selectedProduct!.id!;
-      productName = _selectedProduct!.name;
-      productCode = _selectedProduct!.code;
-      category = _selectedProduct!.category;
-      sellPrice = _selectedProduct!.sellPrice;
+    // Validasi lengkap
+    if (quantity == null || unitPrice == null || sellPrice == null) {
+      SnackbarService.warning(
+        context: context,
+        message: 'Semua field harus diisi dengan angka yang valid',
+      );
+      return;
     }
 
-    // Cek apakah produk sudah ada di list
+    if (quantity <= 0) {
+      SnackbarService.warning(context: context, message: 'Jumlah harus lebih dari 0');
+      return;
+    }
+
+    if (unitPrice <= 0) {
+      SnackbarService.warning(context: context, message: 'Harga beli harus lebih dari 0');
+      return;
+    }
+
+    if (sellPrice <= 0) {
+      SnackbarService.warning(context: context, message: 'Harga jual harus lebih dari 0');
+      return;
+    }
+
+    final productId = -DateTime.now().millisecondsSinceEpoch;
+    final productName = _newProductNameController.text.trim();
+    final productCode = _newProductCodeController.text.trim();
+    final category = _newProductCategoryController.text.trim();
+
     final existingIndex = _items.indexWhere(
       (item) => item.productId == productId,
     );
@@ -1195,28 +1268,106 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         );
       }
 
-      // Simpan data produk baru untuk digunakan saat submit
-      if (isPurchase && _isAddingNewProduct) {
-        _pendingNewProducts[productId] = {
-          'code': productCode,
-          'name': productName,
-          'category': category,
-          'costPrice': unitPrice,
-          'sellPrice': sellPrice ?? unitPrice * 1.3,
-          'stock': quantity,
-        };
-      }
+      _pendingNewProducts[productId] = {
+        'code': productCode,
+        'name': productName,
+        'category': category,
+        'costPrice': unitPrice,
+        'sellPrice': sellPrice,
+        'stock': quantity,
+      };
 
-      // Clear form
-      _quantityController.clear();
-      _priceController.clear();
+      _clearNewProductForm();
+      _isAddingNewProduct = false;
+      
+      SnackbarService.success(
+        context: context,
+        message: 'Produk baru berhasil ditambahkan ke daftar',
+      );
+    });
+  }
 
-      if (isPurchase && _isAddingNewProduct) {
-        _clearNewProductForm();
-        _isAddingNewProduct = false;
+  void _addExistingProduct() {
+    final quantity = int.tryParse(_newProductQuantityController.text);
+    final unitPrice = double.tryParse(_newProductPriceController.text);
+
+    if (quantity == null || unitPrice == null) {
+      SnackbarService.warning(
+        context: context,
+        message: 'Jumlah dan harga harus diisi dengan angka valid',
+      );
+      return;
+    }
+
+    if (quantity <= 0) {
+      SnackbarService.warning(context: context, message: 'Jumlah harus lebih dari 0');
+      return;
+    }
+
+    if (unitPrice <= 0) {
+      SnackbarService.warning(context: context, message: 'Harga satuan harus lebih dari 0');
+      return;
+    }
+
+    if (_selectedProduct == null) {
+      SnackbarService.warning(context: context, message: 'Pilih produk terlebih dahulu');
+      return;
+    }
+
+    final isPurchase = widget.transactionType == 'Pembelian';
+    
+    // 🔥 Validasi stok untuk penjualan
+    if (!isPurchase && quantity > _selectedProduct!.stock) {
+      SnackbarService.warning(
+        context: context,
+        message: 'Stok tidak mencukupi. Stok saat ini: ${_selectedProduct!.stock} unit',
+      );
+      return;
+    }
+
+    final productId = _selectedProduct!.id!;
+    final productName = _selectedProduct!.name;
+    final productCode = _selectedProduct!.code;
+
+    final existingIndex = _items.indexWhere(
+      (item) => item.productId == productId,
+    );
+
+    setState(() {
+      if (existingIndex != -1) {
+        final existingItem = _items[existingIndex];
+        final newQuantity = existingItem.quantity + quantity;
+        final newSubtotal = newQuantity * existingItem.unitPrice;
+
+        _items[existingIndex] = TransactionItem(
+          id: existingItem.id,
+          transactionId: existingItem.transactionId,
+          productId: existingItem.productId,
+          productName: existingItem.productName,
+          productCode: existingItem.productCode,
+          quantity: newQuantity,
+          unitPrice: existingItem.unitPrice,
+          subtotal: newSubtotal,
+        );
       } else {
-        _selectedProduct = null;
+        _items.add(
+          TransactionItem(
+            id: 0,
+            transactionId: 0,
+            productId: productId,
+            productName: productName,
+            productCode: productCode,
+            quantity: quantity,
+            unitPrice: unitPrice,
+            subtotal: quantity * unitPrice,
+          ),
+        );
       }
+
+      _newProductQuantityController.clear();
+      _newProductPriceController.clear();
+      _selectedProduct = null;
+      _isFormValid = false;
     });
   }
 
@@ -1260,7 +1411,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     _newProductCodeController.clear();
     _newProductNameController.clear();
     _newProductCategoryController.clear();
+    _newProductQuantityController.clear();
+    _newProductPriceController.clear();
     _newProductSellPriceController.clear();
+    _isNewProductFormValid = false;
   }
 
   double _getTotalAmount() {
@@ -1275,17 +1429,26 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final isPurchase = widget.transactionType == 'Pembelian';
 
     if (isPurchase && _selectedSupplier == null) {
-      _showSnackBar('Pilih supplier terlebih dahulu', Colors.orange);
+      SnackbarService.warning(
+        context: context,
+        message: 'Pilih supplier terlebih dahulu',
+      );
       return;
     }
 
     if (!isPurchase && _customerNameController.text.isEmpty) {
-      _showSnackBar('Masukkan nama customer', Colors.orange);
+      SnackbarService.warning(
+        context: context,
+        message: 'Masukkan nama customer',
+      );
       return;
     }
 
     if (_items.isEmpty) {
-      _showSnackBar('Tambahkan minimal 1 produk', Colors.orange);
+      SnackbarService.warning(
+        context: context,
+        message: 'Tambahkan minimal 1 produk',
+      );
       return;
     }
 
@@ -1342,11 +1505,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         await stockProvider.refreshStockHistory();
 
         if (mounted) {
-          _showSnackBar(
-            isPurchase
+          SnackbarService.success(
+            context: context,
+            message: isPurchase
                 ? 'Pembelian berhasil disimpan'
                 : 'Penjualan berhasil disimpan',
-            Colors.green,
           );
           Navigator.pop(context, true);
         }
@@ -1357,7 +1520,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }
     } catch (e) {
       if (mounted) {
-        _showSnackBar('Error: ${e.toString()}', Colors.red);
+        SnackbarService.error(
+          context: context,
+          message: 'Error: ${e.toString()}',
+        );
       }
     } finally {
       if (mounted) {
@@ -1366,18 +1532,5 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         });
       }
     }
-  }
-
-  void _showSnackBar(String message, Color color) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 }

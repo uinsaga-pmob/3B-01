@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../widgets/snackbar_services.dart';
 import '../../core/constants/colors.dart';
 import '../../providers/supplier_provider.dart';
 import '../../models/supplier_model.dart';
@@ -273,22 +274,16 @@ class _SupplierScreenState extends State<SupplierScreen> {
         final success = await supplierProvider.deleteSupplier(id);
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(success ? "Supplier berhasil dihapus" : "Gagal menghapus supplier"),
-              backgroundColor: success ? Colors.green : Colors.red,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
+          SnackbarService.success(
+            context: context,
+            message: success ? "Supplier berhasil dihapus" : "Gagal menghapus supplier",
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Error: $e"),
-              backgroundColor: Colors.red,
-            ),
+          SnackbarService.error(
+            context: context,
+            message: "Terjadi kesalahan saat menghapus supplier",
           );
         }
       }
