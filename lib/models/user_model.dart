@@ -1,61 +1,58 @@
-class UserModel {
-  int? id;
-  String username;
-  String password;
-  String namaBisnis;
-  String? gambarProfil;
-  String? createdAt;
-  String? updatedAt;
+class User {
+  final int? id;
+  final String name;
+  final String storeName;
+  final String? profileImage;
+  final String createdAt;
+  final String updatedAt;
 
-  UserModel({
+  User({
     this.id,
-    required this.username,
-    required this.password,
-    required this.namaBisnis,
-    this.gambarProfil,
-    this.createdAt,
-    this.updatedAt,
+    required this.name,
+    required this.storeName,
+    this.profileImage,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'username': username,
-      'password': password,
-      'nama_bisnis': namaBisnis,
-      'gambar_profil': gambarProfil,
+      'id': id,
+      'name': name,
+      'store_name': storeName,
+      'profile_image': profileImage,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
     };
   }
 
-  factory UserModel.fromMap(Map<String, dynamic> map) {
-    return UserModel(
+  factory User.fromMap(Map<String, dynamic> map) {
+    return User(
       id: map['id'],
-      username: map['username'],
-      password: map['password'],
-      namaBisnis: map['nama_bisnis'],
-      gambarProfil: map['gambar_profil'],
+      name: map['name'],
+      storeName: map['store_name'],
+      profileImage: map['profile_image'],
       createdAt: map['created_at'],
       updatedAt: map['updated_at'],
     );
   }
 
-  UserModel copyWith({
+  // Copy with method untuk update
+  User copyWith({
     int? id,
-    String? username,
-    String? password,
-    String? namaBisnis,
-    String? gambarProfil,
+    String? name,
+    String? storeName,
+    String? profileImage,
+    String? createdAt,
+    String? updatedAt,
   }) {
-    return UserModel(
+    return User(
       id: id ?? this.id,
-      username: username ?? this.username,
-      password: password ?? this.password,
-      namaBisnis: namaBisnis ?? this.namaBisnis,
-      gambarProfil: gambarProfil ?? this.gambarProfil,
+      name: name ?? this.name,
+      storeName: storeName ?? this.storeName,
+      profileImage: profileImage ?? this.profileImage,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
-  }
-
-  @override
-  String toString() {
-    return 'UserModel(id: $id, username: $username, namaBisnis: $namaBisnis)';
   }
 }

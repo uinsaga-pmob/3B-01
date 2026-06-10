@@ -1,184 +1,204 @@
+// lib/database/database_helper.dart
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  factory DatabaseHelper() => _instance;
-  DatabaseHelper._internal();
-
+  static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
-  
-  static const int _databaseVersion = 1;
+
+  DatabaseHelper._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
-  }
-
-  Future<Database> _initDatabase() async {
     try {
-      Directory documentsDirectory = await getApplicationDocumentsDirectory();
-      String path = join(documentsDirectory.path, 'umkm_digital_helper.db');
-      
-      debugPrint('Database path: $path');
-      
-      Database db = await openDatabase(
-        path,
-        version: _databaseVersion,
-        onCreate: _onCreate,
-        onConfigure: _onConfigure,
-      );
-      
-      debugPrint('Database opened successfully');
-      await _verifyTables(db);
-      
-      return db;
+      _database = await _initDB('smart_inventory.db');
+      return _database!;
     } catch (e) {
-      debugPrint('Error initializing database: $e');
+      debugPrint('❌ Error initializing database: $e');
       rethrow;
     }
   }
 
-  Future<void> _onConfigure(Database db) async {
-    await db.execute('PRAGMA foreign_keys = ON');
-    debugPrint('Foreign key constraints enabled');
+  Future<Database> _initDB(String filePath) async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
+    
+    debugPrint('📁 Database path: $path');
+
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+      onOpen: (db) {
+        debugPrint('✅ Database opened successfully');
+      },
+    );
   }
 
-  Future<void> _onCreate(Database db, int version) async {
-    debugPrint('Creating database tables for version $version');    
+  Future<void> _createDB(Database db, int version) async {
+    debugPrint('🔄 Creating database tables...');
+    
+    // Tabel User 
     await db.execute('''
-      CREATE TABLE user (
+      CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        nama_bisnis TEXT NOT NULL,
-        gambar_profil TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        name TEXT NOT NULL,
+        store_name TEXT NOT NULL,
+        profile_image TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
       )
     ''');
-    debugPrint('Table "user" created');
+    debugPrint('✅ Table users created');
+
+    // Tabel Supplier (dengan kolom address)
+    await db.execute('''
+      CREATE TABLE suppliers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        contact TEXT NOT NULL,
+        email TEXT NOT NULL,
+        address TEXT
+      )
+    ''');
+    debugPrint('✅ Table suppliers created with address column');
+
+    // Tabel Produk
+    await db.execute('''
+      CREATE TABLE products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        supplier_id INTEGER,
+        stock INTEGER NOT NULL,
+        min_stock INTEGER NOT NULL,
+        cost_price REAL NOT NULL,
+        sell_price REAL NOT NULL,
+        description TEXT,
+        image_path TEXT,
+        FOREIGN KEY (supplier_id) REFERENCES suppliers (id) ON DELETE SET NULL
+      )
+    ''');
+    debugPrint('✅ Table products created');
+
+    // Tabel Transaksi Utama
+    await db.execute('''
+      CREATE TABLE transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        transaction_date TEXT NOT NULL,
+        supplier_id INTEGER,
+        customer_name TEXT,
+        total_amount REAL NOT NULL,
+        discount REAL DEFAULT 0,
+        tax REAL DEFAULT 0,
+        grand_total REAL NOT NULL,
+        payment_method TEXT,
+        notes TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (supplier_id) REFERENCES suppliers (id) ON DELETE SET NULL
+      )
+    ''');
+    debugPrint('✅ Table transactions created');
+
+    // Tabel Detail Transaksi
+    await db.execute('''
+      CREATE TABLE transaction_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        transaction_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        unit_price REAL NOT NULL,
+        subtotal REAL NOT NULL,
+        FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
+      )
+    ''');
+    debugPrint('✅ Table transaction_items created');
+
+    // Tabel Riwayat Stok
+    await db.execute('''
+      CREATE TABLE stock_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        quantity INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        reference_id INTEGER,
+        reference_type TEXT,
+        notes TEXT,
+        created_by TEXT,
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
+      )
+    ''');
+    debugPrint('✅ Table stock_history created');
+    
+    // Create indexes for better performance
+    await db.execute('CREATE INDEX idx_products_supplier ON products(supplier_id)');
+    await db.execute('CREATE INDEX idx_transactions_date ON transactions(transaction_date)');
+    await db.execute('CREATE INDEX idx_stock_history_product ON stock_history(product_id)');
+    await db.execute('CREATE INDEX idx_stock_history_date ON stock_history(date)');
+    
+    debugPrint('🎉 All database tables created successfully!');
   }
 
-  Future<void> _verifyTables(Database db) async {
+  Future<bool> isUserExist() async {
     try {
-      List<Map<String, dynamic>> tables = await db.rawQuery(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
-      );
-      
-      debugPrint('Existing tables: ${tables.map((t) => t['name']).join(', ')}');
-      
-      if (tables.any((t) => t['name'] == 'user')) {
-        int count = Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM user')
-        ) ?? 0;
-        debugPrint('Table "user" exists with $count rows');
-      } else {
-        debugPrint('Warning: Table "user" not found!');
-      }
+      final db = await instance.database;
+      final result = await db.query('users', limit: 1);
+      return result.isNotEmpty;
     } catch (e) {
-      debugPrint('Error verifying tables: $e');
+      debugPrint('❌ Error checking user existence: $e');
+      return false;
     }
   }
 
-  // METHOD CRUD DASAR
-
-  Future<int> insert(String table, Map<String, dynamic> data) async {
-    final db = await database;
-    final now = DateTime.now().toIso8601String();
-    data['created_at'] = now;
-    data['updated_at'] = now;
-    return await db.insert(table, data);
-  }
-
-  Future<int> update(String table, Map<String, dynamic> data, int id) async {
-    final db = await database;
-    data['updated_at'] = DateTime.now().toIso8601String();
-    return await db.update(
-      table,
-      data,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  Future<int> delete(String table, int id) async {
-    final db = await database;
-    return await db.delete(
-      table,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  Future<List<Map<String, dynamic>>> getAll(String table) async {
-    final db = await database;
-    return await db.query(table, orderBy: 'id DESC');
-  }
-
-  Future<Map<String, dynamic>?> getById(String table, int id) async {
-    final db = await database;
-    List<Map<String, dynamic>> result = await db.query(
-      table,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    return result.isNotEmpty ? result.first : null;
-  }
-
-  Future<List<Map<String, dynamic>>> rawQuery(String sql, [List<dynamic>? args]) async {
-    final db = await database;
-    return await db.rawQuery(sql, args ?? []);
-  }
-
-  Future<int> rawInsert(String sql, [List<dynamic>? args]) async {
-    final db = await database;
-    return await db.rawInsert(sql, args ?? []);
-  }
-
-  Future<void> batch(List<Function(Batch batch)> operations) async {
-    final db = await database;
-    Batch batch = db.batch();
-    for (var op in operations) {
-      op(batch);
+  Future<Map<String, dynamic>?> getUser() async {
+    try {
+      final db = await instance.database;
+      final result = await db.query('users', limit: 1);
+      if (result.isNotEmpty) {
+        return result.first;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('❌ Error getting user: $e');
+      return null;
     }
-    await batch.commit();
+  }
+
+  Future<void> clearDatabase() async {
+    try {
+      final db = await instance.database;
+      await db.delete('transaction_items');
+      await db.delete('stock_history');
+      await db.delete('transactions');
+      await db.delete('products');
+      await db.delete('suppliers');
+      await db.delete('users');
+      await db.execute('DELETE FROM sqlite_sequence');
+      debugPrint('🗑️ Database cleared and sequences reset');
+    } catch (e) {
+      debugPrint('❌ Error clearing database: $e');
+      rethrow;
+    }
   }
 
   Future<void> close() async {
-    final db = await database;
-    await db.close();
-    _database = null;
-    debugPrint('Database connection closed');
+    try {
+      final db = await instance.database;
+      await db.close();
+      _database = null;
+      debugPrint('🔒 Database closed');
+    } catch (e) {
+      debugPrint('❌ Error closing database: $e');
+    }
   }
-
-  Future<void> clearAllData() async {
-    final db = await database;
-    await db.delete('user');
-    debugPrint('All data cleared from database');
-  }
-
-  /// Mengecek apakah sudah ada user di database
-  Future<bool> hasUser() async {
-    final db = await database;
-    final result = await db.query('user', limit: 1);
-    return result.isNotEmpty;
-  }
-
-  /// Mendapatkan jumlah user di database
-  Future<int> getUserCount() async {
-    final db = await database;
-    final result = await db.query('user');
-    return result.length;
-  }
-
-  /// Mengambil satu-satunya user
-  Future<Map<String, dynamic>?> getCurrentUser() async {
-    final users = await getAll('user');
-    return users.isNotEmpty ? users.first : null;
+  
+  // Helper method untuk SQL increment
+  static String sql(String expression) {
+    return expression;
   }
 }
