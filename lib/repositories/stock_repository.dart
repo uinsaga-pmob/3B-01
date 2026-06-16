@@ -2,16 +2,17 @@
 import '../database/database_helper.dart';
 import '../models/stock_history_model.dart';
 
+/// Repository untuk operasi riwayat stok
 class StockRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-  // Add stock movement (with optional transaction reference)
+  /// Menambahkan pergerakan stok (dengan referensi transaksi opsional)
   Future<int> addStockMovement(StockHistory movement) async {
     final db = await _dbHelper.database;
     return await db.insert('stock_history', movement.toMap());
   }
 
-  // Tambahkan method untuk bulk insert
+  /// Bulk insert multiple pergerakan stok
   Future<void> addMultipleStockMovements(List<StockHistory> movements) async {
     final db = await _dbHelper.database;
     await db.transaction((txn) async {
@@ -21,7 +22,7 @@ class StockRepository {
     });
   }
 
-  // Get all stock history with product names
+  /// Mendapatkan semua riwayat stok dengan nama produk
   Future<List<StockHistory>> getAllStockHistory() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -33,7 +34,7 @@ class StockRepository {
     return maps.map((x) => StockHistory.fromMap(x)).toList();
   }
 
-  // Get stock history by product ID
+  /// Mendapatkan riwayat stok berdasarkan ID produk
   Future<List<StockHistory>> getStockHistoryByProduct(int productId) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -46,7 +47,7 @@ class StockRepository {
     return maps.map((x) => StockHistory.fromMap(x)).toList();
   }
 
-  // Get stock history by transaction reference
+  /// Mendapatkan riwayat stok berdasarkan referensi transaksi
   Future<List<StockHistory>> getStockHistoryByTransaction(int transactionId) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -59,7 +60,7 @@ class StockRepository {
     return maps.map((x) => StockHistory.fromMap(x)).toList();
   }
 
-  // Get stock in today
+  /// Mendapatkan total stok masuk hari ini
   Future<int> getStockInToday() async {
     final db = await _dbHelper.database;
     final today = DateTime.now().toIso8601String().substring(0, 10);
@@ -71,7 +72,7 @@ class StockRepository {
     return result.first['total'] as int;
   }
 
-  // Get stock out today
+  /// Mendapatkan total stok keluar hari ini
   Future<int> getStockOutToday() async {
     final db = await _dbHelper.database;
     final today = DateTime.now().toIso8601String().substring(0, 10);
@@ -83,7 +84,7 @@ class StockRepository {
     return result.first['total'] as int;
   }
 
-  // Get stock movement by date range
+  /// Mendapatkan riwayat stok berdasarkan rentang tanggal
   Future<List<StockHistory>> getStockHistoryByDateRange(
     String startDate, 
     String endDate
@@ -99,7 +100,7 @@ class StockRepository {
     return maps.map((x) => StockHistory.fromMap(x)).toList();
   }
 
-  // Get stock movement by type (Masuk/Keluar/Rusak/Expired)
+  /// Mendapatkan riwayat stok berdasarkan tipe (Masuk/Keluar/Rusak/Expired)
   Future<List<StockHistory>> getStockHistoryByType(String type) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -112,7 +113,7 @@ class StockRepository {
     return maps.map((x) => StockHistory.fromMap(x)).toList();
   }
 
-  // Get total loss from damaged and expired goods
+  /// Mendapatkan total kerugian dari barang rusak dan kadaluarsa
   Future<double> getTotalLossFromDamageAndExpired() async {
     final db = await _dbHelper.database;
     final result = await db.rawQuery('''
@@ -124,7 +125,7 @@ class StockRepository {
     return (result.first['total_loss'] ?? 0) as double;
   }
 
-  // Delete stock history (for cleanup)
+  /// Hapus riwayat stok (untuk cleanup)
   Future<int> deleteStockHistory(int id) async {
     final db = await _dbHelper.database;
     return await db.delete('stock_history', where: 'id = ?', whereArgs: [id]);

@@ -3,43 +3,48 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+/// Helper untuk mengelola database SQLite
+/// Bertanggung jawab untuk inisialisasi, pembuatan tabel, dan operasi database dasar
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
 
   DatabaseHelper._init();
 
+  /// Mendapatkan instance database dengan thread safety
   Future<Database> get database async {
     if (_database != null) return _database!;
     try {
       _database = await _initDB('smart_inventory.db');
       return _database!;
     } catch (e) {
-      debugPrint('❌ Error initializing database: $e');
+      debugPrint('Error initializing database: $e');
       rethrow;
     }
   }
 
+  /// Inisialisasi database dengan path yang tepat
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
     
-    debugPrint('📁 Database path: $path');
+    debugPrint('Database path: $path');
 
     return await openDatabase(
       path,
       version: 1,
       onCreate: _createDB,
       onOpen: (db) {
-        debugPrint('✅ Database opened successfully');
+        debugPrint('Database opened successfully');
       },
     );
   }
 
+  /// Membuat semua tabel database
   Future<void> _createDB(Database db, int version) async {
-    debugPrint('🔄 Creating database tables...');
+    debugPrint('Creating database tables...');
     
-    // Tabel User 
+    // 1. Tabel User
     await db.execute('''
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,9 +55,9 @@ class DatabaseHelper {
         updated_at TEXT NOT NULL
       )
     ''');
-    debugPrint('✅ Table users created');
+    debugPrint('Table users created');
 
-    // Tabel Supplier (dengan kolom address)
+    // 2. Tabel Supplier (dengan kolom address)
     await db.execute('''
       CREATE TABLE suppliers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,9 +67,9 @@ class DatabaseHelper {
         address TEXT
       )
     ''');
-    debugPrint('✅ Table suppliers created with address column');
+    debugPrint('Table suppliers created with address column');
 
-    // Tabel Produk
+    // 3. Tabel Produk
     await db.execute('''
       CREATE TABLE products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,9 +86,9 @@ class DatabaseHelper {
         FOREIGN KEY (supplier_id) REFERENCES suppliers (id) ON DELETE SET NULL
       )
     ''');
-    debugPrint('✅ Table products created');
+    debugPrint('Table products created');
 
-    // Tabel Transaksi Utama
+    // 4. Tabel Transaksi Utama
     await db.execute('''
       CREATE TABLE transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,9 +106,9 @@ class DatabaseHelper {
         FOREIGN KEY (supplier_id) REFERENCES suppliers (id) ON DELETE SET NULL
       )
     ''');
-    debugPrint('✅ Table transactions created');
+    debugPrint('Table transactions created');
 
-    // Tabel Detail Transaksi
+    // 5. Tabel Detail Transaksi
     await db.execute('''
       CREATE TABLE transaction_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,9 +121,9 @@ class DatabaseHelper {
         FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
       )
     ''');
-    debugPrint('✅ Table transaction_items created');
+    debugPrint('Table transaction_items created');
 
-    // Tabel Riwayat Stok
+    // 6. Tabel Riwayat Stok
     await db.execute('''
       CREATE TABLE stock_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -133,28 +138,30 @@ class DatabaseHelper {
         FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
       )
     ''');
-    debugPrint('✅ Table stock_history created');
+    debugPrint('Table stock_history created');
     
-    // Create indexes for better performance
+    // 7. Create indexes for better performance
     await db.execute('CREATE INDEX idx_products_supplier ON products(supplier_id)');
     await db.execute('CREATE INDEX idx_transactions_date ON transactions(transaction_date)');
     await db.execute('CREATE INDEX idx_stock_history_product ON stock_history(product_id)');
     await db.execute('CREATE INDEX idx_stock_history_date ON stock_history(date)');
     
-    debugPrint('🎉 All database tables created successfully!');
+    debugPrint('All database tables created successfully!');
   }
 
+  /// Cek apakah user sudah ada di database
   Future<bool> isUserExist() async {
     try {
       final db = await instance.database;
       final result = await db.query('users', limit: 1);
       return result.isNotEmpty;
     } catch (e) {
-      debugPrint('❌ Error checking user existence: $e');
+      debugPrint('Error checking user existence: $e');
       return false;
     }
   }
 
+  /// Mendapatkan data user
   Future<Map<String, dynamic>?> getUser() async {
     try {
       final db = await instance.database;
@@ -164,11 +171,12 @@ class DatabaseHelper {
       }
       return null;
     } catch (e) {
-      debugPrint('❌ Error getting user: $e');
+      debugPrint('Error getting user: $e');
       return null;
     }
   }
 
+  /// Menghapus semua data dan reset sequence
   Future<void> clearDatabase() async {
     try {
       final db = await instance.database;
@@ -179,25 +187,26 @@ class DatabaseHelper {
       await db.delete('suppliers');
       await db.delete('users');
       await db.execute('DELETE FROM sqlite_sequence');
-      debugPrint('🗑️ Database cleared and sequences reset');
+      debugPrint('Database cleared and sequences reset');
     } catch (e) {
-      debugPrint('❌ Error clearing database: $e');
+      debugPrint('Error clearing database: $e');
       rethrow;
     }
   }
 
+  /// Menutup koneksi database
   Future<void> close() async {
     try {
       final db = await instance.database;
       await db.close();
       _database = null;
-      debugPrint('🔒 Database closed');
+      debugPrint('Database closed');
     } catch (e) {
-      debugPrint('❌ Error closing database: $e');
+      debugPrint('Error closing database: $e');
     }
   }
   
-  // Helper method untuk SQL increment
+  /// Helper method untuk SQL increment
   static String sql(String expression) {
     return expression;
   }

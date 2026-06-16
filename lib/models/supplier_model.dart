@@ -1,4 +1,6 @@
 // lib/models/supplier_model.dart
+
+/// Model untuk data supplier/pemasok
 class Supplier {
   final int? id;
   final String name;
@@ -14,6 +16,7 @@ class Supplier {
     this.address,
   });
 
+  /// Konversi ke Map untuk penyimpanan database
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -24,6 +27,7 @@ class Supplier {
     };
   }
 
+  /// Factory untuk membuat Supplier dari Map database
   factory Supplier.fromMap(Map<String, dynamic> map) {
     return Supplier(
       id: map['id'],
@@ -34,6 +38,7 @@ class Supplier {
     );
   }
 
+  /// Copy with method untuk update
   Supplier copyWith({
     int? id,
     String? name,
@@ -50,5 +55,6 @@ class Supplier {
     );
   }
 
+  /// Cek apakah supplier memiliki alamat
   bool get hasAddress => address != null && address!.isNotEmpty;
 }

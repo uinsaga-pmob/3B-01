@@ -1,21 +1,26 @@
+// lib/providers/auth_provider.dart
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
 
+/// Provider untuk manajemen autentikasi dan profil user
 class AuthProvider with ChangeNotifier {
   final UserRepository _userRepository = UserRepository();
   
+  // State variables
   User? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
   bool _isInitialized = false;
 
+  // Getters
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isUserExist => _currentUser != null;
   bool get isInitialized => _isInitialized;
 
+  /// Safe notify listeners untuk menghindari error saat build phase
   void _safeNotifyListeners() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (hasListeners) {
@@ -24,7 +29,7 @@ class AuthProvider with ChangeNotifier {
     });
   }
 
-  // Load user profile from database
+  /// Memuat profil user dari database
   Future<void> loadUserProfile() async {
     if (_isLoading || _isInitialized) return;
     
@@ -43,7 +48,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Save user (for onboarding)
+  /// Menyimpan user baru (untuk onboarding)
   Future<bool> saveUser(User user) async {
     if (_isLoading) return false;
     
@@ -68,7 +73,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Update user profile
+  /// Update profil user
   Future<bool> updateUserProfile({
     String? name,
     String? storeName,
@@ -102,7 +107,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Logout / reset user (optional)
+  /// Logout / reset user
   Future<void> resetUser() async {
     _isLoading = true;
     _safeNotifyListeners();

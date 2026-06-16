@@ -1,16 +1,18 @@
+// lib/repositories/user_repository.dart
 import '../database/database_helper.dart';
 import '../models/user_model.dart';
 
+/// Repository untuk operasi CRUD data user
 class UserRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-  // Save user (insert)
+  /// Menyimpan user baru (insert)
   Future<int> saveUser(User user) async {
     final db = await _dbHelper.database;
     return await db.insert('users', user.toMap());
   }
 
-  // Update user
+  /// Update user
   Future<int> updateUser(User user) async {
     final db = await _dbHelper.database;
     return await db.update(
@@ -21,7 +23,7 @@ class UserRepository {
     );
   }
 
-  // Get user (hanya 1 user)
+  /// Mendapatkan user (hanya 1 user karena single user)
   Future<User?> getUser() async {
     final db = await _dbHelper.database;
     final result = await db.query('users', limit: 1);
@@ -32,13 +34,13 @@ class UserRepository {
     return null;
   }
 
-  // Check if user exists
+  /// Cek apakah user sudah ada
   Future<bool> isUserExists() async {
     final user = await getUser();
     return user != null;
   }
 
-  // Delete user (untuk reset)
+  /// Hapus user (untuk reset)
   Future<int> deleteUser() async {
     final db = await _dbHelper.database;
     return await db.delete('users');

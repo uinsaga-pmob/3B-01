@@ -5,35 +5,37 @@ import 'package:flutter/material.dart';
 import '../models/supplier_model.dart';
 import '../repositories/supplier_repository.dart';
 
+/// Provider untuk manajemen data supplier
 class SupplierProvider extends ChangeNotifier {
   final SupplierRepository _supplierRepository = SupplierRepository();
   
+  // State variables
   List<Supplier> _suppliers = [];
   bool _isLoading = false;
   String? _errorMessage;
   bool _isDisposed = false;
   bool _isRefreshing = false;
 
+  // Getters
   List<Supplier> get suppliers => _suppliers;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   int get supplierCount => _suppliers.length;
 
   SupplierProvider() {
-    debugPrint('🏗️ SupplierProvider created');
+    debugPrint('SupplierProvider created');
   }
 
   @override
   void dispose() {
-    debugPrint('🗑️ SupplierProvider disposed');
+    debugPrint('SupplierProvider disposed');
     _isDisposed = true;
     super.dispose();
   }
 
-  // ✅ Safe notify listeners - menggunakan Timer untuk delay
+  /// Safe notify listeners - menggunakan Timer untuk delay
   void _safeNotifyListeners() {
     if (_isDisposed) return;
-    // Gunakan Timer untuk memastikan tidak dipanggil saat build phase
     Timer(const Duration(milliseconds: 10), () {
       if (!_isDisposed && hasListeners) {
         notifyListeners();
@@ -41,11 +43,11 @@ class SupplierProvider extends ChangeNotifier {
     });
   }
 
-  // Method untuk load data
+  /// Memuat semua supplier
   Future<void> loadSuppliers() async {
     if (_isDisposed) return;
     if (_isLoading || _isRefreshing) {
-      debugPrint('📊 Already loading or refreshing, skipping...');
+      debugPrint('Already loading or refreshing, skipping...');
       return;
     }
     
@@ -53,13 +55,13 @@ class SupplierProvider extends ChangeNotifier {
     _errorMessage = null;
 
     try {
-      debugPrint('📊 Fetching suppliers from repository...');
+      debugPrint('Fetching suppliers from repository...');
       final newSuppliers = await _supplierRepository.getAllSuppliers();
       _suppliers = newSuppliers;
-      debugPrint('📊 Loaded ${_suppliers.length} suppliers');
+      debugPrint('Loaded ${_suppliers.length} suppliers');
       _safeNotifyListeners();
     } catch (e, stackTrace) {
-      debugPrint('❌ Error loading suppliers: $e');
+      debugPrint('Error loading suppliers: $e');
       debugPrint('Stack trace: $stackTrace');
       _errorMessage = e.toString();
       _safeNotifyListeners();
@@ -68,25 +70,25 @@ class SupplierProvider extends ChangeNotifier {
     }
   }
 
-  // Method untuk refresh data
+  /// Refresh data supplier
   Future<void> refreshSuppliers() async {
     if (_isDisposed) return;
     if (_isRefreshing) {
-      debugPrint('🔄 Already refreshing, skipping...');
+      debugPrint('Already refreshing, skipping...');
       return;
     }
     
-    debugPrint('🔄 Refresh suppliers started');
+    debugPrint('Refresh suppliers started');
     _isRefreshing = true;
     _isLoading = true;
 
     try {
       final newSuppliers = await _supplierRepository.getAllSuppliers();
       _suppliers = newSuppliers;
-      debugPrint('🔄 Refresh completed: ${_suppliers.length} suppliers');
+      debugPrint('Refresh completed: ${_suppliers.length} suppliers');
       _safeNotifyListeners();
     } catch (e, stackTrace) {
-      debugPrint('❌ Error refreshing suppliers: $e');
+      debugPrint('Error refreshing suppliers: $e');
       debugPrint('Stack trace: $stackTrace');
       _errorMessage = e.toString();
       _safeNotifyListeners();
@@ -96,9 +98,9 @@ class SupplierProvider extends ChangeNotifier {
     }
   }
 
-  // Add supplier
+  /// Menambahkan supplier baru
   Future<bool> addSupplier(Supplier supplier) async {
-    debugPrint('➕ addSupplier called for: ${supplier.name}');
+    debugPrint('addSupplier called for: ${supplier.name}');
     
     if (_isDisposed) return false;
     if (_isLoading || _isRefreshing) return false;
@@ -107,7 +109,7 @@ class SupplierProvider extends ChangeNotifier {
 
     try {
       final id = await _supplierRepository.addSupplier(supplier);
-      debugPrint('➕ Supplier added with id: $id');
+      debugPrint('Supplier added with id: $id');
       
       if (id > 0) {
         await refreshSuppliers();
@@ -115,7 +117,7 @@ class SupplierProvider extends ChangeNotifier {
       }
       return false;
     } catch (e, stackTrace) {
-      debugPrint('❌ Error adding supplier: $e');
+      debugPrint('Error adding supplier: $e');
       debugPrint('Stack trace: $stackTrace');
       _errorMessage = e.toString();
       return false;
@@ -124,9 +126,9 @@ class SupplierProvider extends ChangeNotifier {
     }
   }
 
-  // Update supplier
+  /// Update supplier
   Future<bool> updateSupplier(Supplier supplier) async {
-    debugPrint('✏️ updateSupplier called for: ${supplier.name} (id: ${supplier.id})');
+    debugPrint('updateSupplier called for: ${supplier.name} (id: ${supplier.id})');
     
     if (_isDisposed) return false;
     if (_isLoading || _isRefreshing) return false;
@@ -135,7 +137,7 @@ class SupplierProvider extends ChangeNotifier {
 
     try {
       final result = await _supplierRepository.updateSupplier(supplier);
-      debugPrint('✏️ Update result: $result');
+      debugPrint('Update result: $result');
       
       if (result > 0) {
         await refreshSuppliers();
@@ -143,7 +145,7 @@ class SupplierProvider extends ChangeNotifier {
       }
       return false;
     } catch (e, stackTrace) {
-      debugPrint('❌ Error updating supplier: $e');
+      debugPrint('Error updating supplier: $e');
       debugPrint('Stack trace: $stackTrace');
       _errorMessage = e.toString();
       return false;
@@ -152,9 +154,9 @@ class SupplierProvider extends ChangeNotifier {
     }
   }
 
-  // Delete supplier
+  /// Hapus supplier
   Future<bool> deleteSupplier(int id) async {
-    debugPrint('🗑️ deleteSupplier called for id: $id');
+    debugPrint('deleteSupplier called for id: $id');
     
     if (_isDisposed) return false;
     if (_isLoading || _isRefreshing) return false;
@@ -163,7 +165,7 @@ class SupplierProvider extends ChangeNotifier {
 
     try {
       final result = await _supplierRepository.deleteSupplier(id);
-      debugPrint('🗑️ Delete result: $result');
+      debugPrint('Delete result: $result');
       
       if (result > 0) {
         _suppliers.removeWhere((s) => s.id == id);
@@ -173,7 +175,7 @@ class SupplierProvider extends ChangeNotifier {
       }
       return false;
     } catch (e, stackTrace) {
-      debugPrint('❌ Error deleting supplier: $e');
+      debugPrint('Error deleting supplier: $e');
       debugPrint('Stack trace: $stackTrace');
       _errorMessage = e.toString();
       return false;
@@ -182,6 +184,7 @@ class SupplierProvider extends ChangeNotifier {
     }
   }
 
+  /// Mendapatkan supplier berdasarkan ID
   Supplier? getSupplierById(int id) {
     try {
       return _suppliers.firstWhere((s) => s.id == id);
@@ -190,9 +193,10 @@ class SupplierProvider extends ChangeNotifier {
     }
   }
   
+  /// Reset provider (untuk logout)
   void reset() {
     if (_isDisposed) return;
-    debugPrint('🔄 SupplierProvider reset');
+    debugPrint('SupplierProvider reset');
     _suppliers = [];
     _isLoading = false;
     _errorMessage = null;

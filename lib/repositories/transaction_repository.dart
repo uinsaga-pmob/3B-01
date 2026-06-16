@@ -3,15 +3,17 @@ import 'package:flutter/foundation.dart';
 import '../database/database_helper.dart';
 import '../models/transaction_model.dart';
 import '../models/transaction_item_model.dart';
-import '../models/stock_history_model.dart'; // ✅ DIPERLUKAN untuk stock history
+import '../models/stock_history_model.dart';
 import 'product_repository.dart';
 
+/// Repository untuk operasi transaksi (pembelian/penjualan) dan mutasi stok
 class TransactionRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final ProductRepository _productRepo = ProductRepository();
 
-  // ==================== TRANSAKSI PEMBELIAN DENGAN PRODUK BARU ====================
+  // ==================== PEMBELIAN DENGAN PRODUK BARU ====================
   
+  /// Membuat transaksi pembelian dengan produk baru yang juga disimpan ke database
   Future<int> createPurchaseTransactionWithNewProducts({
     required int supplierId,
     required List<TransactionItem> items,
@@ -29,7 +31,7 @@ class TransactionRepository {
     final now = DateTime.now().toIso8601String();
     
     return await db.transaction((txn) async {
-      debugPrint('📦 Memulai transaksi pembelian dengan ${newProducts.length} produk baru');
+      debugPrint('Memulai transaksi pembelian dengan ${newProducts.length} produk baru');
       
       // 1. Simpan produk baru terlebih dahulu dan catat mapping ID
       final Map<int, int> newProductIdMap = {};
@@ -49,18 +51,18 @@ class TransactionRepository {
         };
         
         final productId = await txn.insert('products', productMap);
-        debugPrint('✅ Produk baru disimpan: ${newProduct['name']} (ID: $productId)');
+        debugPrint('Produk baru disimpan: ${newProduct['name']} (ID: $productId)');
         
         // Simpan mapping dari ID sementara (negatif) ke ID asli
         for (var item in items) {
           if (item.productId < 0 && item.productCode == newProduct['code']) {
             newProductIdMap[item.productId] = productId;
-            debugPrint('📌 Mapping ID sementara ${item.productId} -> ID asli $productId');
+            debugPrint('Mapping ID sementara ${item.productId} -> ID asli $productId');
             break;
           }
         }
         
-        // ✅ Catat stock history untuk produk baru (menggunakan StockHistory model)
+        // Catat stock history untuk produk baru
         if (newProduct['stock'] > 0) {
           final stockMovement = StockHistory(
             id: null,
@@ -75,7 +77,7 @@ class TransactionRepository {
             createdBy: createdBy,
           );
           await txn.insert('stock_history', stockMovement.toMap());
-          debugPrint('📊 Stok awal produk baru: ${newProduct['stock']} unit');
+          debugPrint('Stok awal produk baru: ${newProduct['stock']} unit');
         }
       }
       
@@ -95,11 +97,11 @@ class TransactionRepository {
             unitPrice: item.unitPrice,
             subtotal: item.subtotal,
           ));
-          debugPrint('🔄 Update item produk baru: ${item.productName} (ID: ${newProductIdMap[item.productId]})');
+          debugPrint('Update item produk baru: ${item.productName} (ID: ${newProductIdMap[item.productId]})');
         } else if (item.productId > 0) {
           // Produk yang sudah ada
           updatedItems.add(item);
-          debugPrint('📦 Item produk lama: ${item.productName} (ID: ${item.productId})');
+          debugPrint('Item produk lama: ${item.productName} (ID: ${item.productId})');
         }
       }
       
@@ -119,7 +121,7 @@ class TransactionRepository {
       };
       
       final transactionId = await txn.insert('transactions', transaction);
-      debugPrint('✅ Transaksi pembelian disimpan (ID: $transactionId)');
+      debugPrint('Transaksi pembelian disimpan (ID: $transactionId)');
       
       // 4. Insert detail items dan update stok produk
       for (var item in updatedItems) {
@@ -138,9 +140,9 @@ class TransactionRepository {
           'UPDATE products SET stock = stock + ? WHERE id = ?',
           [item.quantity, item.productId],
         );
-        debugPrint('📦 Stok produk ID ${item.productId} bertambah ${item.quantity}');
+        debugPrint('Stok produk ID ${item.productId} bertambah ${item.quantity}');
         
-        // ✅ Catat ke stock_history (menggunakan StockHistory model)
+        // Catat ke stock_history
         final stockMovement = StockHistory(
           id: null,
           productId: item.productId,
@@ -156,13 +158,14 @@ class TransactionRepository {
         await txn.insert('stock_history', stockMovement.toMap());
       }
       
-      debugPrint('🎉 Transaksi pembelian selesai!');
+      debugPrint('Transaksi pembelian selesai!');
       return transactionId;
     });
   }
 
-  // ==================== TRANSAKSI PEMBELIAN (TANPA PRODUK BARU) ====================
+  // ==================== PEMBELIAN (TANPA PRODUK BARU) ====================
   
+  /// Membuat transaksi pembelian untuk produk yang sudah ada
   Future<int> createPurchaseTransaction({
     required int supplierId,
     required List<TransactionItem> items,
@@ -194,10 +197,10 @@ class TransactionRepository {
     };
     
     return await db.transaction((txn) async {
-      debugPrint('📦 Memulai transaksi pembelian dengan ${items.length} item');
+      debugPrint('Memulai transaksi pembelian dengan ${items.length} item');
       
       final transactionId = await txn.insert('transactions', transaction);
-      debugPrint('✅ Transaksi pembelian disimpan (ID: $transactionId)');
+      debugPrint('Transaksi pembelian disimpan (ID: $transactionId)');
       
       for (var item in items) {
         // Insert transaction item
@@ -216,7 +219,7 @@ class TransactionRepository {
           [item.quantity, item.productId],
         );
         
-        // ✅ Catat ke stock_history (menggunakan StockHistory model)
+        // Catat ke stock_history
         final stockMovement = StockHistory(
           id: null,
           productId: item.productId,
@@ -231,16 +234,17 @@ class TransactionRepository {
         );
         await txn.insert('stock_history', stockMovement.toMap());
         
-        debugPrint('📦 Stok produk ID ${item.productId} bertambah ${item.quantity}');
+        debugPrint('Stok produk ID ${item.productId} bertambah ${item.quantity}');
       }
       
-      debugPrint('🎉 Transaksi pembelian selesai!');
+      debugPrint('Transaksi pembelian selesai!');
       return transactionId;
     });
   }
 
-  // ==================== TRANSAKSI PENJUALAN ====================
+  // ==================== PENJUALAN ====================
   
+  /// Membuat transaksi penjualan dengan validasi stok
   Future<int> createSaleTransaction({
     required String customerName,
     required List<TransactionItem> items,
@@ -283,10 +287,10 @@ class TransactionRepository {
     };
     
     return await db.transaction((txn) async {
-      debugPrint('💰 Memulai transaksi penjualan untuk customer: $customerName');
+      debugPrint('Memulai transaksi penjualan untuk customer: $customerName');
       
       final transactionId = await txn.insert('transactions', transaction);
-      debugPrint('✅ Transaksi penjualan disimpan (ID: $transactionId)');
+      debugPrint('Transaksi penjualan disimpan (ID: $transactionId)');
       
       for (var item in items) {
         // Insert transaction item
@@ -305,7 +309,7 @@ class TransactionRepository {
           [item.quantity, item.productId],
         );
         
-        // ✅ Catat ke stock_history (menggunakan StockHistory model)
+        // Catat ke stock_history
         final stockMovement = StockHistory(
           id: null,
           productId: item.productId,
@@ -320,16 +324,17 @@ class TransactionRepository {
         );
         await txn.insert('stock_history', stockMovement.toMap());
         
-        debugPrint('📦 Stok produk ID ${item.productId} berkurang ${item.quantity}');
+        debugPrint('Stok produk ID ${item.productId} berkurang ${item.quantity}');
       }
       
-      debugPrint('🎉 Transaksi penjualan selesai!');
+      debugPrint('Transaksi penjualan selesai!');
       return transactionId;
     });
   }
 
   // ==================== MUTASI STOK MANUAL ====================
   
+  /// Mencatat barang rusak dan mengurangi stok
   Future<void> recordDamagedGoods({
     required int productId,
     required int quantity,
@@ -353,7 +358,7 @@ class TransactionRepository {
         [quantity, productId],
       );
       
-      // ✅ Catat ke stock_history (menggunakan StockHistory model)
+      // Catat ke stock_history
       final stockMovement = StockHistory(
         id: null,
         productId: productId,
@@ -368,10 +373,11 @@ class TransactionRepository {
       );
       await txn.insert('stock_history', stockMovement.toMap());
       
-      debugPrint('⚠️ Barang rusak dicatat: Produk ID $productId, quantity $quantity');
+      debugPrint('Barang rusak dicatat: Produk ID $productId, quantity $quantity');
     });
   }
   
+  /// Mencatat barang kadaluarsa dan mengurangi stok
   Future<void> recordExpiredGoods({
     required int productId,
     required int quantity,
@@ -395,7 +401,7 @@ class TransactionRepository {
         [quantity, productId],
       );
       
-      // ✅ Catat ke stock_history (menggunakan StockHistory model)
+      // Catat ke stock_history
       final stockMovement = StockHistory(
         id: null,
         productId: productId,
@@ -410,12 +416,13 @@ class TransactionRepository {
       );
       await txn.insert('stock_history', stockMovement.toMap());
       
-      debugPrint('⏰ Barang expired dicatat: Produk ID $productId, quantity $quantity');
+      debugPrint('Barang expired dicatat: Produk ID $productId, quantity $quantity');
     });
   }
 
   // ==================== GET DATA TRANSAKSI ====================
   
+  /// Mendapatkan semua transaksi dengan data ringkasan
   Future<List<Transaction>> getAllTransactions() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -433,6 +440,7 @@ class TransactionRepository {
     return maps.map((x) => Transaction.fromMap(x)).toList();
   }
   
+  /// Mendapatkan detail transaksi (termasuk item-itemnya)
   Future<Map<String, dynamic>> getTransactionWithDetails(int transactionId) async {
     final db = await _dbHelper.database;
     
@@ -474,6 +482,7 @@ class TransactionRepository {
     };
   }
   
+  /// Mendapatkan transaksi berdasarkan rentang tanggal
   Future<List<Transaction>> getTransactionsByDateRange(
     String startDate,
     String endDate,
@@ -495,6 +504,7 @@ class TransactionRepository {
     return maps.map((x) => Transaction.fromMap(x)).toList();
   }
   
+  /// Mendapatkan transaksi berdasarkan tipe (Pembelian/Penjualan)
   Future<List<Transaction>> getTransactionsByType(String type) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -515,6 +525,7 @@ class TransactionRepository {
 
   // ==================== STATISTIK DAN LAPORAN ====================
   
+  /// Mendapatkan total penjualan hari ini
   Future<double> getTotalSalesToday() async {
     final db = await _dbHelper.database;
     final today = DateTime.now().toIso8601String().substring(0, 10);
@@ -526,6 +537,7 @@ class TransactionRepository {
     return (result.first['total'] ?? 0) as double;
   }
   
+  /// Mendapatkan total pembelian hari ini
   Future<double> getTotalPurchasesToday() async {
     final db = await _dbHelper.database;
     final today = DateTime.now().toIso8601String().substring(0, 10);
@@ -537,6 +549,7 @@ class TransactionRepository {
     return (result.first['total'] ?? 0) as double;
   }
   
+  /// Mendapatkan total transaksi hari ini
   Future<int> getTotalTransactionsToday() async {
     final db = await _dbHelper.database;
     final today = DateTime.now().toIso8601String().substring(0, 10);
@@ -548,6 +561,7 @@ class TransactionRepository {
     return (result.first['total'] ?? 0) as int;
   }
   
+  /// Mendapatkan laporan laba rugi untuk periode tertentu
   Future<Map<String, double>> getProfitLossReport(
     String startDate,
     String endDate,
@@ -608,6 +622,7 @@ class TransactionRepository {
 
   // ==================== PEMBATALAN TRANSAKSI ====================
   
+  /// Membatalkan transaksi dan mengembalikan stok
   Future<void> cancelTransaction(int transactionId) async {
     final db = await _dbHelper.database;
     final transactionDetail = await getTransactionWithDetails(transactionId);
@@ -625,7 +640,7 @@ class TransactionRepository {
             [item.quantity, item.productId],
           );
           
-          // ✅ Catat ke stock_history
+          // Catat ke stock_history
           final stockMovement = StockHistory(
             id: null,
             productId: item.productId,
@@ -646,7 +661,7 @@ class TransactionRepository {
             [item.quantity, item.productId],
           );
           
-          // ✅ Catat ke stock_history
+          // Catat ke stock_history
           final stockMovement = StockHistory(
             id: null,
             productId: item.productId,
@@ -664,7 +679,7 @@ class TransactionRepository {
       }
       
       await txn.delete('transactions', where: 'id = ?', whereArgs: [transactionId]);
-      debugPrint('🗑️ Transaksi ID $transactionId dibatalkan');
+      debugPrint('Transaksi ID $transactionId dibatalkan');
     });
   }
 }

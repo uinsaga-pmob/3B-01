@@ -4,26 +4,29 @@ import '../models/stock_history_model.dart';
 import '../repositories/stock_repository.dart';
 import '../repositories/product_repository.dart';
 
+/// Provider untuk manajemen riwayat stok
 class StockProvider with ChangeNotifier {
   final StockRepository _stockRepository = StockRepository();
   final ProductRepository _productRepository = ProductRepository();
   
+  // State variables
   List<StockHistory> _stockHistory = [];
   List<StockHistory> _filteredHistory = [];
   bool _isLoading = false;
   String? _errorMessage;
   String _filterType = 'Semua';
 
-  List<StockHistory> get stockHistory => _filteredHistory;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  String get filterType => _filterType;
-
   // Analytics
   int _stockInToday = 0;
   int _stockOutToday = 0;
   double _totalLossFromDamage = 0;
   double _totalLossFromExpired = 0;
+
+  // Getters
+  List<StockHistory> get stockHistory => _filteredHistory;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+  String get filterType => _filterType;
   
   int get stockInToday => _stockInToday;
   int get stockOutToday => _stockOutToday;
@@ -31,6 +34,7 @@ class StockProvider with ChangeNotifier {
   double get totalLossFromExpired => _totalLossFromExpired;
   double get totalLoss => _totalLossFromDamage + _totalLossFromExpired;
 
+  /// Safe notify listeners
   void _safeNotifyListeners() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (hasListeners) {
@@ -39,7 +43,7 @@ class StockProvider with ChangeNotifier {
     });
   }
 
-  // Load all stock history
+  /// Memuat semua riwayat stok
   Future<void> loadStockHistory() async {
     if (_isLoading) return;
     
@@ -60,7 +64,7 @@ class StockProvider with ChangeNotifier {
     }
   }
 
-  // Force reload stock history (untuk refresh setelah ada perubahan)
+  /// Refresh riwayat stok
   Future<void> refreshStockHistory() async {
     _isLoading = true;
     _safeNotifyListeners();
@@ -78,13 +82,14 @@ class StockProvider with ChangeNotifier {
     }
   }
 
-  // Apply filter
+  /// Set filter berdasarkan tipe
   void setFilter(String type) {
     _filterType = type;
     _applyFilter();
     _safeNotifyListeners();
   }
 
+  /// Apply filter ke daftar stok
   void _applyFilter() {
     if (_filterType == 'Semua') {
       _filteredHistory = List.from(_stockHistory);
@@ -95,7 +100,7 @@ class StockProvider with ChangeNotifier {
     }
   }
 
-  // Record stock movement (manual adjustment)
+  /// Record pergerakan stok (manual adjustment)
   Future<bool> recordStockMovement({
     required int productId,
     required String type,
@@ -125,7 +130,7 @@ class StockProvider with ChangeNotifier {
       // Update product stock
       await _productRepository.updateProductStock(productId, newStock);
 
-      // ✅ Perbaiki: Gunakan StockHistory object
+      // Save stock movement
       final stockMovement = StockHistory(
         id: null,
         productId: productId,
@@ -153,13 +158,12 @@ class StockProvider with ChangeNotifier {
     }
   }
 
-  // Refresh semua data yang terkait dengan stok
+  /// Refresh semua data yang terkait dengan stok
   Future<void> _refreshAllRelatedData() async {
-    // Reload stock history
     await refreshStockHistory();
   }
 
-  // Load today's statistics
+  /// Load statistik hari ini
   Future<void> _loadTodayStats() async {
     try {
       _stockInToday = await _stockRepository.getStockInToday();
@@ -169,7 +173,7 @@ class StockProvider with ChangeNotifier {
     }
   }
   
-  // Load loss statistics
+  /// Load statistik kerugian
   Future<void> _loadLossStats() async {
     try {
       _totalLossFromDamage = await _stockRepository.getTotalLossFromDamageAndExpired();
@@ -178,7 +182,7 @@ class StockProvider with ChangeNotifier {
     }
   }
 
-  // Get stock history for specific product
+  /// Mendapatkan riwayat stok untuk produk tertentu
   Future<List<StockHistory>> getProductStockHistory(int productId) async {
     try {
       return await _stockRepository.getStockHistoryByProduct(productId);
@@ -187,7 +191,7 @@ class StockProvider with ChangeNotifier {
     }
   }
   
-  // Get stock history by transaction
+  /// Mendapatkan riwayat stok berdasarkan transaksi
   Future<List<StockHistory>> getStockHistoryByTransaction(int transactionId) async {
     try {
       return await _stockRepository.getStockHistoryByTransaction(transactionId);
@@ -196,7 +200,7 @@ class StockProvider with ChangeNotifier {
     }
   }
 
-  // Get last 7 days movement for chart
+  /// Mendapatkan data pergerakan 7 hari terakhir untuk chart
   Future<Map<String, Map<String, int>>> getLast7DaysMovement() async {
     final Map<String, Map<String, int>> result = {};
     final now = DateTime.now();
@@ -236,7 +240,7 @@ class StockProvider with ChangeNotifier {
     return result;
   }
   
-  // Get stock summary by type
+  /// Mendapatkan summary stok berdasarkan tipe
   Map<String, int> getStockSummary() {
     final summary = {
       'Masuk': 0,
@@ -252,7 +256,7 @@ class StockProvider with ChangeNotifier {
     return summary;
   }
   
-  // Reset provider (for logout)
+  /// Reset provider (untuk logout)
   void reset() {
     _stockHistory = [];
     _filteredHistory = [];

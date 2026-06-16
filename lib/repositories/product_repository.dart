@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart';
 import '../database/database_helper.dart';
 import '../models/product_model.dart';
 
+/// Repository untuk operasi CRUD data produk
 class ProductRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-  // Get all products with supplier name
+  /// Mendapatkan semua produk dengan nama supplier
   Future<List<Product>> getAllProducts() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -18,7 +19,7 @@ class ProductRepository {
     return maps.map((x) => Product.fromMap(x)).toList();
   }
 
-  // Get product by ID
+  /// Mendapatkan produk berdasarkan ID
   Future<Product?> getProductById(int id) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -34,7 +35,7 @@ class ProductRepository {
     return null;
   }
 
-  // Get low stock products
+  /// Mendapatkan produk dengan stok rendah (<= min_stock)
   Future<List<Product>> getLowStockProducts() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -47,13 +48,13 @@ class ProductRepository {
     return maps.map((x) => Product.fromMap(x)).toList();
   }
 
-  // Add product
+  /// Menambahkan produk baru
   Future<int> addProduct(Product product) async {
     final db = await _dbHelper.database;
     return await db.insert('products', product.toMap());
   }
 
-  // Update product
+  /// Update produk
   Future<int> updateProduct(Product product) async {
     final db = await _dbHelper.database;
     return await db.update(
@@ -64,7 +65,7 @@ class ProductRepository {
     );
   }
 
-  // Update product stock only
+  /// Update stok produk saja
   Future<int> updateProductStock(int productId, int newStock) async {
     final db = await _dbHelper.database;
     return await db.update(
@@ -75,10 +76,10 @@ class ProductRepository {
     );
   }
 
-  // Delete product
+  /// Hapus produk (dengan pengecekan relasi transaksi)
   Future<int> deleteProduct(int id) async {
     final db = await _dbHelper.database;
-    // Check if product has transactions
+    // Cek apakah produk memiliki transaksi
     final transactions = await db.rawQuery('''
       SELECT COUNT(*) as count 
       FROM transaction_items 
@@ -92,14 +93,14 @@ class ProductRepository {
     return await db.delete('products', where: 'id = ?', whereArgs: [id]);
   }
 
-  // Get total products count
+  /// Mendapatkan total jumlah produk
   Future<int> getTotalProductsCount() async {
     final db = await _dbHelper.database;
     final result = await db.rawQuery('SELECT COUNT(*) as count FROM products');
     return result.first['count'] as int;
   }
 
-  // Get total inventory value (based on cost price)
+  /// Mendapatkan total nilai inventory (berdasarkan harga modal)
   Future<double> getTotalInventoryValue() async {
     final db = await _dbHelper.database;
     final result = await db.rawQuery(
@@ -108,7 +109,7 @@ class ProductRepository {
     return (result.first['total'] ?? 0) as double;
   }
 
-  // Get product profit margin
+  /// Mendapatkan margin keuntungan produk
   Future<double> getProductProfitMargin(int productId) async {
     final db = await _dbHelper.database;
     final result = await db.rawQuery('''
@@ -123,7 +124,8 @@ class ProductRepository {
     }
     return 0.0;
   }
-    // Tambahkan method untuk bulk update stock
+
+  /// Bulk update stok untuk multiple produk
   Future<void> updateMultipleProductStock(Map<int, int> stockUpdates) async {
     final db = await _dbHelper.database;
     await db.transaction((txn) async {
@@ -138,7 +140,7 @@ class ProductRepository {
     });
   }
 
-  // Tambahkan method untuk get multiple products by ids
+  /// Mendapatkan multiple produk berdasarkan list ID
   Future<Map<int, Product>> getProductsByIds(List<int> ids) async {
     if (ids.isEmpty) return {};
     final db = await _dbHelper.database;
@@ -155,10 +157,11 @@ class ProductRepository {
     };
   }
 
+  /// DEBUG: Print semua produk ke console
   Future<void> debugPrintAllProducts() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query('products');
-    debugPrint('📊 DATABASE PRODUCTS: ${maps.length} products');
+    debugPrint('DATABASE PRODUCTS: ${maps.length} products');
     for (var map in maps) {
       debugPrint('   - ID: ${map['id']}, Name: ${map['name']}, Code: ${map['code']}');
     }

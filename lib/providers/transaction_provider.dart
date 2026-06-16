@@ -4,9 +4,11 @@ import '../models/transaction_model.dart';
 import '../models/transaction_item_model.dart';
 import '../repositories/transaction_repository.dart';
 
+/// Provider untuk manajemen transaksi (pembelian/penjualan)
 class TransactionProvider with ChangeNotifier {
   final TransactionRepository _transactionRepository = TransactionRepository();
   
+  // State variables
   List<Transaction> _transactions = [];
   List<Transaction> _filteredTransactions = [];
   bool _isLoading = false;
@@ -19,7 +21,8 @@ class TransactionProvider with ChangeNotifier {
   double _totalPurchases = 0;
   double _totalProfit = 0;
   int _totalTransactions = 0;
-  
+
+  // Getters
   List<Transaction> get transactions => _filteredTransactions;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -32,6 +35,7 @@ class TransactionProvider with ChangeNotifier {
   int get totalTransactions => _totalTransactions;
   double get netCashFlow => _totalSales - _totalPurchases;
 
+  /// Safe notify listeners
   void _safeNotifyListeners() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (hasListeners) {
@@ -40,6 +44,7 @@ class TransactionProvider with ChangeNotifier {
     });
   }
 
+  /// Memuat semua transaksi
   Future<void> loadTransactions() async {
     if (_isLoading) return;
     
@@ -59,6 +64,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
 
+  /// Refresh transaksi
   Future<void> refreshTransactions() async {
     _isLoading = true;
     _safeNotifyListeners();
@@ -75,18 +81,21 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
+  /// Set filter berdasarkan tipe transaksi
   void setFilterByType(String type) {
     _filterType = type;
     _applyFilters();
     _safeNotifyListeners();
   }
   
+  /// Set filter berdasarkan rentang tanggal
   void setFilterByDateRange(String range) {
     _filterDateRange = range;
     _applyFilters();
     _safeNotifyListeners();
   }
   
+  /// Apply filter ke daftar transaksi
   void _applyFilters() {
     DateTime now = DateTime.now();
     DateTime startDate;
@@ -120,6 +129,7 @@ class TransactionProvider with ChangeNotifier {
     }).toList();
   }
   
+  /// Load analytics data
   Future<void> _loadAnalytics() async {
     try {
       _totalSales = await _transactionRepository.getTotalSalesToday();
@@ -134,7 +144,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
-  // Method untuk transaksi pembelian dengan produk baru
+  /// Membuat transaksi pembelian dengan produk baru
   Future<bool> createPurchaseTransactionWithNewProducts({
     required int supplierId,
     required List<TransactionItem> items,
@@ -161,7 +171,7 @@ class TransactionProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _errorMessage = e.toString();
-      debugPrint('❌ Error in createPurchaseTransactionWithNewProducts: $e');
+      debugPrint('Error in createPurchaseTransactionWithNewProducts: $e');
       return false;
     } finally {
       _isLoading = false;
@@ -169,7 +179,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
-  // Create purchase transaction (tanpa produk baru)
+  /// Membuat transaksi pembelian (tanpa produk baru)
   Future<bool> createPurchaseTransaction({
     required int supplierId,
     required List<TransactionItem> items,
@@ -205,6 +215,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
+  /// Membuat transaksi penjualan
   Future<bool> createSaleTransaction({
     required String customerName,
     required List<TransactionItem> items,
@@ -240,6 +251,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
+  /// Mencatat barang rusak
   Future<bool> recordDamagedGoods({
     required int productId,
     required int quantity,
@@ -268,6 +280,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
+  /// Mencatat barang kadaluarsa
   Future<bool> recordExpiredGoods({
     required int productId,
     required int quantity,
@@ -296,6 +309,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
+  /// Mendapatkan detail transaksi
   Future<Map<String, dynamic>> getTransactionDetails(int transactionId) async {
     try {
       return await _transactionRepository.getTransactionWithDetails(transactionId);
@@ -305,6 +319,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
+  /// Membatalkan transaksi
   Future<bool> cancelTransaction(int transactionId) async {
     if (_isLoading) return false;
     
@@ -324,6 +339,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
+  /// Mendapatkan laporan laba rugi
   Future<Map<String, double>> getProfitLossReport(String startDate, String endDate) async {
     try {
       return await _transactionRepository.getProfitLossReport(startDate, endDate);
@@ -333,6 +349,7 @@ class TransactionProvider with ChangeNotifier {
     }
   }
   
+  /// Mendapatkan summary transaksi untuk chart
   Map<String, Map<String, double>> getTransactionSummaryForChart() {
     final Map<String, Map<String, double>> summary = {};
     
@@ -353,6 +370,7 @@ class TransactionProvider with ChangeNotifier {
     return summary;
   }
   
+  /// Reset provider (untuk logout)
   void reset() {
     _transactions = [];
     _filteredTransactions = [];

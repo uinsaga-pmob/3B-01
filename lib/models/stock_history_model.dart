@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants/colors.dart';
 
+/// Model untuk riwayat perubahan stok produk
 class StockHistory {
   final int? id;
   final int productId;
@@ -27,6 +28,7 @@ class StockHistory {
     this.createdBy,
   });
 
+  /// Konversi ke Map untuk penyimpanan database
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -41,6 +43,7 @@ class StockHistory {
     };
   }
 
+  /// Factory untuk membuat StockHistory dari Map database
   factory StockHistory.fromMap(Map<String, dynamic> map) {
     return StockHistory(
       id: map['id'],
@@ -56,13 +59,15 @@ class StockHistory {
     );
   }
 
-  // Helper method untuk cek apakah dari transaksi
+  // ==================== HELPER PROPERTIES ====================
+  
+  /// Cek apakah dari transaksi
   bool get isFromTransaction => referenceId != null && referenceType == 'transaction';
   
-  // Helper method untuk cek apakah adjustment manual
+  /// Cek apakah adjustment manual
   bool get isAdjustment => referenceType == 'adjustment';
   
-  // Helper method untuk mendapatkan IconData berdasarkan tipe (Material Icons)
+  /// Mendapatkan IconData berdasarkan tipe
   IconData get typeIconData {
     switch (type) {
       case 'Masuk':
@@ -78,7 +83,7 @@ class StockHistory {
     }
   }
   
-  // Helper method untuk mendapatkan warna icon
+  /// Mendapatkan warna icon berdasarkan tipe
   Color get typeIconColor {
     switch (type) {
       case 'Masuk':
@@ -94,7 +99,7 @@ class StockHistory {
     }
   }
   
-  // Helper method untuk mendapatkan background color
+  /// Mendapatkan background color berdasarkan tipe
   Color get typeBackgroundColor {
     switch (type) {
       case 'Masuk':
@@ -110,7 +115,7 @@ class StockHistory {
     }
   }
   
-  // Helper method untuk mendapatkan teks status
+  /// Mendapatkan teks status berdasarkan tipe
   String get typeText {
     switch (type) {
       case 'Masuk':
@@ -126,7 +131,7 @@ class StockHistory {
     }
   }
   
-  // String icon (untuk fallback atau jika tidak menggunakan Material)
+  /// Mendapatkan string icon (untuk fallback)
   String get typeIconString {
     switch (type) {
       case 'Masuk':
@@ -142,7 +147,7 @@ class StockHistory {
     }
   }
   
-  // Helper method untuk format quantity dengan tanda +/- 
+  /// Format quantity dengan tanda +/- 
   String get formattedQuantity {
     switch (type) {
       case 'Masuk':
@@ -158,7 +163,7 @@ class StockHistory {
     }
   }
   
-  // Helper method untuk mendapatkan warna quantity
+  /// Mendapatkan warna quantity berdasarkan tipe
   Color get quantityColor {
     switch (type) {
       case 'Masuk':

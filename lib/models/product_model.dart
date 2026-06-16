@@ -1,4 +1,6 @@
 // lib/models/product_model.dart
+
+/// Model untuk data produk di sistem inventory
 class Product {
   final int? id;
   final String code;
@@ -11,7 +13,7 @@ class Product {
   final double sellPrice;
   final String? description;
   final String? imagePath;
-  final String? supplierName;
+  final String? supplierName; // Untuk hasil join
 
   Product({
     this.id,
@@ -28,6 +30,7 @@ class Product {
     this.supplierName,
   });
 
+  /// Konversi ke Map untuk penyimpanan database
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -44,6 +47,7 @@ class Product {
     };
   }
 
+  /// Factory untuk membuat Product dari Map database
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
       id: map['id'] is int ? map['id'] : int.tryParse(map['id'].toString()),
@@ -71,6 +75,7 @@ class Product {
     );
   }
 
+  /// Copy with method untuk update
   Product copyWith({
     int? id,
     String? code,
@@ -101,8 +106,17 @@ class Product {
     );
   }
 
+  // ==================== COMPUTED PROPERTIES ====================
+  
+  /// Total nilai stok berdasarkan harga modal
   double get totalStockValue => stock * costPrice;
+  
+  /// Potensi keuntungan dari semua stok
   double get potentialProfit => stock * (sellPrice - costPrice);
+  
+  /// Cek apakah stok rendah (<= min_stock)
   bool get isLowStock => stock <= minStock;
+  
+  /// Cek apakah stok habis
   bool get isOutOfStock => stock <= 0;
 }

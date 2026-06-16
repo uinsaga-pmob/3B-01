@@ -1,5 +1,6 @@
 // lib/models/transaction_model.dart
 
+/// Model untuk data transaksi (pembelian/penjualan)
 class Transaction {
   final int? id;
   final String type; // 'Pembelian' atau 'Penjualan'
@@ -37,6 +38,7 @@ class Transaction {
     this.totalQuantity,
   });
 
+  /// Konversi ke Map untuk penyimpanan database
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -54,6 +56,7 @@ class Transaction {
     };
   }
 
+  /// Factory untuk membuat Transaction dari Map database
   factory Transaction.fromMap(Map<String, dynamic> map) {
     return Transaction(
       id: map['id'],
@@ -74,11 +77,15 @@ class Transaction {
     );
   }
 
-  // Helper method untuk cek tipe transaksi
+  // ==================== HELPER PROPERTIES ====================
+  
+  /// Cek apakah transaksi pembelian
   bool get isPurchase => type == 'Pembelian';
+  
+  /// Cek apakah transaksi penjualan
   bool get isSale => type == 'Penjualan';
   
-  // Helper method untuk mendapatkan nama pihak terkait
+  /// Mendapatkan nama pihak terkait
   String get counterpartyName {
     if (isPurchase) {
       return supplierName ?? 'Supplier Tidak Dikenal';
@@ -87,12 +94,12 @@ class Transaction {
     }
   }
   
-  // Helper method untuk format mata uang
+  /// Format grand total ke mata uang Rupiah
   String get formattedGrandTotal => 'Rp ${grandTotal.toStringAsFixed(0)}';
   
-  // Helper method untuk mendapatkan icon transaksi
+  /// Mendapatkan icon transaksi
   String get typeIcon => isPurchase ? '📦' : '💰';
   
-  // Helper method untuk mendapatkan warna transaksi
+  /// Mendapatkan warna transaksi
   String get typeColor => isPurchase ? 'blue' : 'green';
 }

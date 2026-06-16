@@ -1,3 +1,6 @@
+// lib/models/user_model.dart
+
+/// Model untuk data user/pengguna aplikasi
 class User {
   final int? id;
   final String name;
@@ -15,6 +18,7 @@ class User {
     required this.updatedAt,
   });
 
+  /// Konversi ke Map untuk penyimpanan database
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -26,6 +30,7 @@ class User {
     };
   }
 
+  /// Factory untuk membuat User dari Map database
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
       id: map['id'],
@@ -37,7 +42,7 @@ class User {
     );
   }
 
-  // Copy with method untuk update
+  /// Copy with method untuk update
   User copyWith({
     int? id,
     String? name,

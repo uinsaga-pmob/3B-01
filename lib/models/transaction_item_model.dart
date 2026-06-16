@@ -1,11 +1,12 @@
 // lib/models/transaction_item_model.dart
 
+/// Model untuk item detail transaksi
 class TransactionItem {
   final int? id;
   final int transactionId;
   final int productId;
-  final String? productName; // Hasil join
-  final String? productCode; // Hasil join
+  final String? productName; // Hasil join dari query
+  final String? productCode; // Hasil join dari query
   final int quantity;
   final double unitPrice;
   final double subtotal;
@@ -21,6 +22,7 @@ class TransactionItem {
     required this.subtotal,
   });
 
+  /// Konversi ke Map untuk penyimpanan database
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -32,6 +34,7 @@ class TransactionItem {
     };
   }
 
+  /// Factory untuk membuat TransactionItem dari Map database
   factory TransactionItem.fromMap(Map<String, dynamic> map) {
     return TransactionItem(
       id: map['id'],
@@ -45,11 +48,15 @@ class TransactionItem {
     );
   }
 
-  // Helper method untuk format mata uang
+  // ==================== HELPER PROPERTIES ====================
+  
+  /// Format harga satuan ke mata uang Rupiah
   String get formattedUnitPrice => 'Rp ${unitPrice.toStringAsFixed(0)}';
+  
+  /// Format subtotal ke mata uang Rupiah
   String get formattedSubtotal => 'Rp ${subtotal.toStringAsFixed(0)}';
   
-  // Helper method untuk cek keuntungan per item (perlu cost price dari product)
+  /// Menghitung keuntungan per item (perlu cost price dari product)
   double calculateProfit(double costPrice) {
     return (unitPrice - costPrice) * quantity;
   }
