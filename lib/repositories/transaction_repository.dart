@@ -13,7 +13,8 @@ class TransactionRepository {
 
   // ==================== PEMBELIAN DENGAN PRODUK BARU ====================
   
-  /// Membuat transaksi pembelian dengan produk baru yang juga disimpan ke database
+  // lib/repositories/transaction_repository.dart
+
   Future<int> createPurchaseTransactionWithNewProducts({
     required int supplierId,
     required List<TransactionItem> items,
@@ -24,7 +25,6 @@ class TransactionRepository {
   }) async {
     final db = await _dbHelper.database;
     
-    // Hitung total amount
     double totalAmount = items.fold(0, (sum, item) => sum + item.subtotal);
     double grandTotal = totalAmount;
     
@@ -33,7 +33,7 @@ class TransactionRepository {
     return await db.transaction((txn) async {
       debugPrint('Memulai transaksi pembelian dengan ${newProducts.length} produk baru');
       
-      // 1. Simpan produk baru terlebih dahulu dan catat mapping ID
+      // 1. Simpan produk baru
       final Map<int, int> newProductIdMap = {};
       
       for (var newProduct in newProducts) {
@@ -42,7 +42,7 @@ class TransactionRepository {
           'name': newProduct['name'],
           'category': newProduct['category'],
           'supplier_id': supplierId,
-          'stock': newProduct['stock'],
+          'stock': newProduct['stock'], // Stok awal
           'min_stock': 5,
           'cost_price': newProduct['costPrice'],
           'sell_price': newProduct['sellPrice'],
@@ -53,11 +53,10 @@ class TransactionRepository {
         final productId = await txn.insert('products', productMap);
         debugPrint('Produk baru disimpan: ${newProduct['name']} (ID: $productId)');
         
-        // Simpan mapping dari ID sementara (negatif) ke ID asli
+        // Mapping ID
         for (var item in items) {
           if (item.productId < 0 && item.productCode == newProduct['code']) {
             newProductIdMap[item.productId] = productId;
-            debugPrint('Mapping ID sementara ${item.productId} -> ID asli $productId');
             break;
           }
         }
@@ -77,16 +76,13 @@ class TransactionRepository {
             createdBy: createdBy,
           );
           await txn.insert('stock_history', stockMovement.toMap());
-          debugPrint('Stok awal produk baru: ${newProduct['stock']} unit');
         }
       }
       
-      // 2. Update item dengan productId yang benar
+      // 2. Update items dengan productId yang benar
       final List<TransactionItem> updatedItems = [];
-      
       for (var item in items) {
         if (item.productId < 0 && newProductIdMap.containsKey(item.productId)) {
-          // Produk baru - ganti dengan ID asli
           updatedItems.add(TransactionItem(
             id: item.id,
             transactionId: item.transactionId,
@@ -97,11 +93,8 @@ class TransactionRepository {
             unitPrice: item.unitPrice,
             subtotal: item.subtotal,
           ));
-          debugPrint('Update item produk baru: ${item.productName} (ID: ${newProductIdMap[item.productId]})');
         } else if (item.productId > 0) {
-          // Produk yang sudah ada
           updatedItems.add(item);
-          debugPrint('Item produk lama: ${item.productName} (ID: ${item.productId})');
         }
       }
       
@@ -121,9 +114,8 @@ class TransactionRepository {
       };
       
       final transactionId = await txn.insert('transactions', transaction);
-      debugPrint('Transaksi pembelian disimpan (ID: $transactionId)');
       
-      // 4. Insert detail items dan update stok produk
+      // 4. Insert detail items dan update stok
       for (var item in updatedItems) {
         // Insert transaction item
         final itemMap = {
@@ -135,27 +127,36 @@ class TransactionRepository {
         };
         await txn.insert('transaction_items', itemMap);
         
-        // Update stok produk (stok bertambah)
-        await txn.rawUpdate(
-          'UPDATE products SET stock = stock + ? WHERE id = ?',
-          [item.quantity, item.productId],
-        );
-        debugPrint('Stok produk ID ${item.productId} bertambah ${item.quantity}');
+        // ⚠️ PERBAIKAN: Hanya update stok untuk produk LAMA (yang sudah ada)
+        // Produk baru tidak perlu diupdate stoknya karena sudah punya stok awal
+        final isNewProduct = newProductIdMap.containsValue(item.productId);
         
-        // Catat ke stock_history
-        final stockMovement = StockHistory(
-          id: null,
-          productId: item.productId,
-          productName: item.productName ?? 'Produk',
-          type: 'Masuk',
-          quantity: item.quantity,
-          date: now,
-          referenceId: transactionId,
-          referenceType: 'transaction',
-          notes: 'Pembelian dari supplier',
-          createdBy: createdBy,
-        );
-        await txn.insert('stock_history', stockMovement.toMap());
+        if (!isNewProduct) {
+          await txn.rawUpdate(
+            'UPDATE products SET stock = stock + ? WHERE id = ?',
+            [item.quantity, item.productId],
+          );
+          debugPrint('Stok produk lama ID ${item.productId} bertambah ${item.quantity}');
+        } else {
+          debugPrint('Produk baru ID ${item.productId} sudah memiliki stok awal, tidak ditambah lagi');
+        }
+        
+        // Catat ke stock_history untuk transaksi (hanya untuk produk lama)
+        if (!isNewProduct) {
+          final stockMovement = StockHistory(
+            id: null,
+            productId: item.productId,
+            productName: item.productName ?? 'Produk',
+            type: 'Masuk',
+            quantity: item.quantity,
+            date: now,
+            referenceId: transactionId,
+            referenceType: 'transaction',
+            notes: 'Pembelian dari supplier',
+            createdBy: createdBy,
+          );
+          await txn.insert('stock_history', stockMovement.toMap());
+        }
       }
       
       debugPrint('Transaksi pembelian selesai!');

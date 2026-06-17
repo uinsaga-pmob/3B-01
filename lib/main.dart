@@ -14,7 +14,7 @@ import 'screens/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // ✅ Tambahkan error handling untuk global
+  // Tambahkan error handling untuk global
   FlutterError.onError = (FlutterErrorDetails details) {
     debugPrint('❌ Flutter Error: ${details.exception}');
     debugPrint('Stack trace: ${details.stack}');
@@ -23,7 +23,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // ✅ Gunakan lazy loading yang benar
+        // Gunakan lazy loading yang benar
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
@@ -91,7 +91,7 @@ class SmartInventoryApp extends StatelessWidget {
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: const SplashScreen(),
       
-      // ✅ Tambahkan error builder untuk menangkap error
+      // Tambahkan error builder untuk menangkap error
       builder: (context, child) {
         return child!;
       },
